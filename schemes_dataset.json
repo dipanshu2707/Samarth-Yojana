@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "title": "Yojana Sathi — Scheme Eligibility Dataset (v1)",
+    "purpose": "Source-of-truth dataset for the eligibility-matching engine built for MPOnline Idea & Innovation Hackathon 2026, Challenge 5 (AI Innovation for Public Services & Citizen-Centric Governance).",
+    "compiled_on": "2026-09-27",
+    "compiled_from": "Public scheme-explainer sources (buddy4study, myscheme.gov.in, vikaspedia, official portals referenced within). NOT scraped from official government APIs.",
+    "disclaimer": "This is a proof-of-concept dataset for a hackathon prototype, not a legal or authoritative source. Income limits, percentage cutoffs and stipend amounts on real government schemes change frequently and sometimes vary slightly across secondary sources. Every 'official_portal' URL below must be treated as the actual source of truth — the app's UI must visibly say 'verify on the official portal before applying' next to every result. Do not add schemes to this file without a citation; do not let the LLM invent new schemes at runtime.",
+    "domains": ["education_scholarship", "women_child_welfare", "skill_employment", "healthcare"]
+  },
+  "schemes": [
+    {
+      "id": "mp_post_matric_scst_obc",
+      "name_en": "Post-Matric Scholarship for SC/ST/OBC Students (MP Scholarship Portal 2.0 / MPTAAS)",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Tribal Welfare Dept. / Social Justice Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Monthly financial assistance for SC, ST and OBC students enrolled in post-matric (Class 11 onward, including UG/PG/diploma/professional courses) at a recognised institution in MP.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["SC", "ST", "OBC"],
+        "max_annual_family_income": 250000,
+        "education_level": ["class_11", "class_12", "undergraduate", "postgraduate", "diploma", "professional", "phd"],
+        "marital_status": null,
+        "other_conditions": [
+          "Enrolled in a recognised institution in India",
+          "Some sub-schemes cite an income ceiling closer to ₹6,00,000 for specific categories — verify current ceiling for your exact category on the portal"
+        ]
+      },
+      "benefits": "Approx. ₹500/month for 10 months (varies by sub-scheme and course level); ST students apply specifically via the MPTAAS portal.",
+      "required_documents": ["Samagra ID", "Aadhaar card", "Domicile certificate", "Caste certificate", "Income certificate", "Class 10/12 marksheet", "Admission letter / fee receipt", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in (general) / MPTAAS portal (ST-specific)",
+      "notes": "Two overlapping portals exist historically (scholarshipportal.mp.nic.in legacy and hescholarship.mp.gov.in current) — confirm the live one before demo."
+    },
+    {
+      "id": "mp_vikramaditya_scholarship",
+      "name_en": "Vikramaditya Scholarship Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Higher Education Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Small annual scholarship for meritorious General-category students from low-income families pursuing higher education.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["General"],
+        "max_annual_family_income": 54000,
+        "education_level": ["undergraduate"],
+        "marital_status": null,
+        "other_conditions": [
+          "At least 60% marks in Class 12",
+          "Sources differ on exact income tiers (₹54,000 vs ₹1,20,000 for some course levels) — treat ₹54,000 as the conservative default and flag the higher tier as 'possibly eligible, verify'"
+        ]
+      },
+      "benefits": "Up to ₹2,500 per annum.",
+      "required_documents": ["Income certificate", "Class 12 marksheet", "Domicile certificate", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in",
+      "notes": "Low benefit amount — good for demoing 'small but real' schemes many citizens don't know exist."
+    },
+    {
+      "id": "mp_gaon_ki_beti",
+      "name_en": "Gaon Ki Beti Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Higher Education Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Scholarship for meritorious girls from rural Madhya Pradesh to support their higher education.",
+      "eligibility": {
+        "residency": "Rural Madhya Pradesh",
+        "gender": "female",
+        "age_min": null,
+        "age_max": null,
+        "category": ["Any"],
+        "max_annual_family_income": null,
+        "education_level": ["undergraduate"],
+        "marital_status": null,
+        "other_conditions": ["At least 60% marks in Class 12", "Must reside in a rural area of MP"]
+      },
+      "benefits": "₹500/month for 10 months.",
+      "required_documents": ["Class 12 marksheet", "Rural residence proof", "Domicile certificate", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in",
+      "notes": null
+    },
+    {
+      "id": "mp_awas_sahayata",
+      "name_en": "Awas Sahayata Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Tribal/Social Justice Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Hostel/residence financial support for SC/ST students who must live away from home to study.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["SC", "ST"],
+        "max_annual_family_income": null,
+        "education_level": ["undergraduate", "postgraduate", "diploma", "professional"],
+        "marital_status": null,
+        "other_conditions": ["Enrolled in a higher education institution away from permanent residence, with no hostel seat available"]
+      },
+      "benefits": "Fixed annual allowance toward accommodation costs (amount varies; verify on portal).",
+      "required_documents": ["Caste certificate", "Admission/enrollment proof", "Proof that no hostel seat was allotted", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in",
+      "notes": "Good example scheme for the 'lesser-known' narrative in your pitch."
+    },
+    {
+      "id": "mp_mmvy",
+      "name_en": "Mukhyamantri Medhavi Vidyarthi Yojana (MMVY)",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Higher Education Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Flagship merit scholarship covering tuition fees (govt. college) or a large fixed amount (private college) for high-scoring Class 12 students entering undergraduate courses.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["Any"],
+        "max_annual_family_income": 600000,
+        "education_level": ["undergraduate"],
+        "marital_status": null,
+        "other_conditions": [
+          "MP Board Class 12: ~70-75% marks (sources vary — verify current cutoff); CBSE/ICSE: ~85%",
+          "Engineering aspirants: JEE Main rank below 1,50,000 (some sources say 50,000 — verify)",
+          "Medical aspirants: admission via NEET to a govt./private medical/dental/AYUSH college",
+          "Law aspirants: qualified CLAT, admission to an NLU"
+        ]
+      },
+      "benefits": "Full tuition fee reimbursement (government colleges) or up to ₹1.5 lakh/year (private colleges).",
+      "required_documents": ["Class 12 marksheet", "Income certificate", "Domicile certificate", "College admission proof", "JEE/NEET/CLAT scorecard if applicable", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in",
+      "notes": "High-value, high-visibility scheme — strong demo candidate for a 'high school topper' persona."
+    },
+    {
+      "id": "mp_mmjky_sambal",
+      "name_en": "Mukhya Mantri Jan Kalyan (Sambal) Yojana — Scholarship for Unorganised Workers' Children",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Labour Dept., Govt. of MP",
+      "domain": "education_scholarship",
+      "summary": "Scholarship for wards of unorganised-sector workers registered under the Sambal Yojana, covering UG/diploma/polytechnic/ITI, with special provisions for engineering, medical and law aspirants.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["Any"],
+        "max_annual_family_income": null,
+        "education_level": ["undergraduate", "postgraduate", "diploma", "professional"],
+        "marital_status": null,
+        "other_conditions": [
+          "Parent/guardian must be registered as an unorganised worker under the Sambal/Labour Dept. scheme",
+          "Engineering aspirants: JEE Main rank below 1,50,000",
+          "Medical aspirants: admission via JIPMER/AIIMS/NEET",
+          "Law aspirants: admission via CLAT"
+        ]
+      },
+      "benefits": "Course fee support, similar structure to MMVY, scaled to unorganised-worker households.",
+      "required_documents": ["Sambal/labour registration card of parent", "Admission proof", "Income proof", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://hescholarship.mp.gov.in",
+      "notes": "Requires parent's Sambal registration as a precondition — a good example of a scheme with a 'hidden prerequisite' that citizens often miss, worth calling out explicitly in the UI."
+    },
+    {
+      "id": "mp_ladli_laxmi",
+      "name_en": "Ladli Laxmi Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Women & Child Development Dept., Govt. of MP",
+      "domain": "women_child_welfare",
+      "summary": "Staged financial-assistance scheme for girl children born in MP, paying out at school milestones (Class 6/9/11/12) and a lump sum at age 21, aimed at preventing school drop-out and child marriage.",
+      "eligibility": {
+        "residency": "Parents are domicile of Madhya Pradesh",
+        "gender": "female",
+        "age_min": 0,
+        "age_max": 21,
+        "category": ["Any"],
+        "max_annual_family_income": null,
+        "education_level": ["any"],
+        "marital_status": null,
+        "other_conditions": [
+          "Girl child born on or after 1 January 2006",
+          "Registration must be done within one year of birth — NOT retroactively available for older girls who were never registered",
+          "Parents must not be income-tax payers",
+          "Family-planning condition applies from the second child onward"
+        ]
+      },
+      "benefits": "₹6,000/year for first 5 years (₹30,000 total), ₹2,000 at Class 6, ₹4,000 at Class 9, ₹7,500 at Class 11, ₹200/month during Class 11-12, and a lump sum around ₹1 lakh at age 21 (subject to not being married before 18); Ladli Laxmi 2.0 adds ~₹25,000 for graduation/professional courses.",
+      "required_documents": ["Birth certificate", "Anganwadi registration", "Parents' domicile proof", "Parents' income-tax non-payment declaration"],
+      "application_mode": "online",
+      "official_portal": "https://ladlilaxmi.mp.gov.in",
+      "notes": "IMPORTANT eligibility trap for your matching logic: a girl over ~1 year old who was never registered as an infant is NOT eligible now, even if she meets every other criterion. Model this as a hard disqualifier, not just an age check."
+    },
+    {
+      "id": "mp_ladli_behna",
+      "name_en": "Mukhyamantri Ladli Behna Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Women & Child Development Dept., Govt. of MP",
+      "domain": "women_child_welfare",
+      "summary": "Unconditional monthly cash transfer to economically weaker married/widowed/divorced/abandoned women in MP.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "female",
+        "age_min": 21,
+        "age_max": 60,
+        "category": ["Any"],
+        "max_annual_family_income": 250000,
+        "education_level": ["any"],
+        "marital_status": ["married", "widowed", "divorced", "abandoned"],
+        "other_conditions": [
+          "Not an income-tax payer (or family member of one)",
+          "No family member in regular government employment",
+          "Family does not own more than 5 acres of agricultural land",
+          "Family does not own a four-wheeler",
+          "Not already receiving ₹1,000+/month under another government pension scheme (partial top-up possible if receiving less)"
+        ]
+      },
+      "benefits": "₹1,250/month (₹15,000/year) via Direct Benefit Transfer.",
+      "required_documents": ["Samagra ID", "Aadhaar card", "Bank passbook"],
+      "application_mode": "offline (through local Anganwadi/camp)",
+      "official_portal": "https://cmladlibahna.mp.gov.in",
+      "notes": "One of MP's largest-scale schemes (1.29+ crore beneficiaries) — good for a 'why does the citizen not already know about this' framing in your pitch."
+    },
+    {
+      "id": "mp_ladli_behna_awas",
+      "name_en": "Ladli Behna Awas Yojana",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Women & Child Development Dept. / Housing, Govt. of MP",
+      "domain": "women_child_welfare",
+      "summary": "Housing assistance for existing Ladli Behna beneficiaries who are homeless or living in a kutcha/damaged house and are not covered by PMAY.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "female",
+        "age_min": 21,
+        "age_max": 60,
+        "category": ["Any"],
+        "max_annual_family_income": 250000,
+        "education_level": ["any"],
+        "marital_status": ["married", "widowed", "divorced", "abandoned"],
+        "other_conditions": [
+          "Must already be an active Ladli Behna Yojana beneficiary",
+          "Must be homeless or living in a kutcha/damaged house",
+          "Must be excluded from the PMAY beneficiary list"
+        ]
+      },
+      "benefits": "₹2,00,000 for constructing a pucca house, released in 3 installments.",
+      "required_documents": ["Ladli Behna beneficiary ID", "Proof of current housing condition", "PMAY exclusion confirmation"],
+      "application_mode": "online (linked to Ladli Behna portal)",
+      "official_portal": "https://cmladlibahna.mp.gov.in",
+      "notes": "Good example of a 'dependent scheme' — your matching engine should only surface this if the user already qualifies for Ladli Behna, and should say so explicitly."
+    },
+    {
+      "id": "central_nsp_st_fellowship",
+      "name_en": "National Fellowship and Scholarship for Higher Education of ST Students",
+      "level": "central",
+      "state": null,
+      "department": "Ministry of Tribal Affairs (via National Scholarship Portal)",
+      "domain": "education_scholarship",
+      "summary": "Central Sector Scheme covering full tuition and approved course fees for ST students in graduate/postgraduate courses at Ministry-notified premier institutions.",
+      "eligibility": {
+        "residency": "Citizen of India",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["ST"],
+        "max_annual_family_income": 600000,
+        "education_level": ["undergraduate", "postgraduate"],
+        "marital_status": null,
+        "other_conditions": [
+          "Admission to one of ~265 Ministry-notified premier institutions",
+          "Income rule: orphans exempt from income limit; married candidates' spouse income included; siblings' income excluded"
+        ]
+      },
+      "benefits": "Full tuition + approved course fees, continued for the course duration subject to satisfactory performance.",
+      "required_documents": ["Caste certificate (ST)", "Income certificate", "Admission proof at notified institution", "Aadhaar", "Bank passbook"],
+      "application_mode": "online",
+      "official_portal": "https://scholarships.gov.in",
+      "notes": null
+    },
+    {
+      "id": "central_nsp_general",
+      "name_en": "Central Sector / UGC Scholarship Schemes (via National Scholarship Portal)",
+      "level": "central",
+      "state": null,
+      "department": "Ministry of Electronics & IT / respective line ministries (via NSP)",
+      "domain": "education_scholarship",
+      "summary": "Umbrella category for the 100+ central, state and UGC scholarship schemes hosted on the National Scholarship Portal, spanning Class 1 through PhD.",
+      "eligibility": {
+        "residency": "Citizen of India",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["SC", "ST", "OBC", "Minority", "General", "EWS"],
+        "max_annual_family_income": 800000,
+        "education_level": ["class_1_10", "class_11", "class_12", "undergraduate", "postgraduate", "professional", "phd"],
+        "marital_status": null,
+        "other_conditions": ["At least 50% marks in the previous qualifying exam", "Requires One-Time Registration (OTR) on NSP, Aadhaar-linked bank account"]
+      },
+      "benefits": "Varies widely by specific scheme: ₹1,000-5,000/year (pre-matric) up to ₹80,000/year (post-matric/UGC/professional).",
+      "required_documents": ["OTR ID", "Aadhaar card", "Caste certificate", "Income certificate", "Previous marksheet", "Domicile certificate", "Bank passbook", "Bonafide student certificate"],
+      "application_mode": "online",
+      "official_portal": "https://scholarships.gov.in",
+      "notes": "Treat this as a 'catch-all' bucket in the demo — flag it whenever a user doesn't cleanly fit a named MP state scheme but is a student under the income ceiling, and be explicit in the UI that the exact sub-scheme still needs to be selected on NSP itself."
+    },
+    {
+      "id": "mp_seekho_kamao",
+      "name_en": "Mukhyamantri Seekho Kamao Yojana (MMSKY)",
+      "level": "state",
+      "state": "Madhya Pradesh",
+      "department": "Technical Education & Skill Development Dept., Govt. of MP",
+      "domain": "skill_employment",
+      "summary": "On-the-job training scheme for educated-but-unemployed youth in registered industrial/commercial establishments, with a monthly stipend during training and a recognised certificate afterward.",
+      "eligibility": {
+        "residency": "Domicile of Madhya Pradesh",
+        "gender": "any",
+        "age_min": 18,
+        "age_max": 29,
+        "category": ["Any"],
+        "max_annual_family_income": null,
+        "education_level": ["class_12", "iti", "diploma", "undergraduate", "postgraduate"],
+        "marital_status": null,
+        "other_conditions": [
+          "Must have completed formal education (12th/ITI/diploma/graduate) — currently enrolled full-time students are not eligible",
+          "Must be currently unemployed / not in a job"
+        ]
+      },
+      "benefits": "Monthly stipend: ₹8,000 (12th pass), ₹8,500 (ITI), ₹9,000 (diploma), ₹10,000 (graduate+), largely via DBT; SCVT certificate on completion.",
+      "required_documents": ["MP domicile certificate", "Samagra ID", "Aadhaar card", "Ration card", "Educational qualification documents", "Bank account details"],
+      "application_mode": "online",
+      "official_portal": "https://mmsky.mp.gov.in",
+      "notes": "This is the one scheme in the dataset outside pure 'education/scholarship' — use it to demonstrate the tool also covers the Recruitment/Employability domain named in the challenge brief."
+    },
+    {
+      "id": "central_ayushman_bharat_pmjay",
+      "name_en": "Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana (PM-JAY)",
+      "level": "central",
+      "state": null,
+      "department": "National Health Authority, Ministry of Health & Family Welfare",
+      "domain": "healthcare",
+      "summary": "Cashless hospitalisation cover of ₹5 lakh/family/year for secondary and tertiary care at empanelled hospitals, for economically vulnerable families identified via SECC 2011 deprivation criteria, plus a universal cover for all seniors 70+.",
+      "eligibility": {
+        "residency": "Citizen of India",
+        "gender": "any",
+        "age_min": null,
+        "age_max": null,
+        "category": ["Any"],
+        "max_annual_family_income": null,
+        "education_level": ["any"],
+        "marital_status": null,
+        "other_conditions": [
+          "Family identified under SECC 2011 deprivation criteria, OR holds a valid BPL/Antyodaya ration card, OR",
+          "Any individual aged 70+ is eligible regardless of income (via a separate Ayushman Vay Vandana Card)"
+        ]
+      },
+      "benefits": "₹5,00,000 per family per year, cashless, family-floater basis; additional ₹5,00,000 top-up exclusively for 70+ members already covered under a family card.",
+      "required_documents": ["Ration card (BPL/Antyodaya) or SECC entitlement letter", "Aadhaar card (identity only)"],
+      "application_mode": "online (via Ayushman App/portal) or at empanelled hospital",
+      "official_portal": "https://pmjay.gov.in",
+      "notes": "The only genuinely nationwide, non-education scheme in this v1 dataset — useful to show the model generalises beyond scholarships if you extend scope in a later phase."
+    }
+  ],
+  "test_personas": [
+    {
+      "name": "Aarti — rural OBC undergraduate",
+      "profile": {"age": 19, "gender": "female", "residency": "Madhya Pradesh (rural)", "category": "OBC", "annual_family_income": 200000, "education_level": "undergraduate", "class12_percentage": 65, "occupation": "student", "marital_status": "unmarried"},
+      "expect_eligible_for": ["mp_post_matric_scst_obc", "central_nsp_general", "mp_gaon_ki_beti"],
+      "expect_not_eligible_for": ["mp_vikramaditya_scholarship", "mp_mmvy", "mp_ladli_behna"],
+      "why": "OBC + rural + under relevant income ceilings covers post-matric and NSP; 65% doesn't clear MMVY's ~70-75% cutoff; Vikramaditya is General-category only; too young for Ladli Behna."
+    },
+    {
+      "name": "Ramesh — unemployed ITI graduate",
+      "profile": {"age": 22, "gender": "male", "residency": "Madhya Pradesh", "category": "General", "annual_family_income": 300000, "education_level": "iti", "occupation": "unemployed"},
+      "expect_eligible_for": ["mp_seekho_kamao"],
+      "expect_not_eligible_for": ["mp_post_matric_scst_obc", "mp_ladli_behna"],
+      "why": "Fits Seekho Kamao's age/education/unemployment criteria exactly; not a current student so post-matric scholarships don't apply; male, so Ladli Behna doesn't apply."
+    },
+    {
+      "name": "Sunita — married woman, low income",
+      "profile": {"age": 34, "gender": "female", "residency": "Madhya Pradesh", "category": "General", "annual_family_income": 150000, "marital_status": "married", "occupation": "homemaker", "owns_agricultural_land_acres": 1, "owns_four_wheeler": false, "income_tax_payer": false},
+      "expect_eligible_for": ["mp_ladli_behna"],
+      "expect_not_eligible_for": ["mp_ladli_behna_awas"],
+      "why": "Meets every Ladli Behna condition; Awas Yojana additionally requires already being a beneficiary AND homeless/kutcha housing, which isn't stated here — matcher should ask a follow-up question rather than assume."
+    },
+    {
+      "name": "Neha — infant girl, just born",
+      "profile": {"age": 0, "gender": "female", "residency": "Madhya Pradesh", "birth_year": 2026, "registered_at_anganwadi": true, "parents_income_tax_payer": false},
+      "expect_eligible_for": ["mp_ladli_laxmi"],
+      "expect_not_eligible_for": [],
+      "why": "Textbook Ladli Laxmi case — use this persona to test the registration-timing disqualifier logic against an older, unregistered-girl counter-example."
+    }
+  ]
+}
