@@ -15,32 +15,27 @@ Yojana Sathi helps citizens of Madhya Pradesh find government welfare and schola
 
 ---
 
-## 2. System Architecture
+## 2. System Architecture (Unified: 1 Backend + Frontend)
 
 ```
 ┌──────────────────────────────────────────────┐
-│        Frontend (React 18 + Vite + Tailwind)  │  Port 5173
-│  • Bilingual UI (English & हिन्दी)           │  Talks ONLY to Gateway
-│  • Multi-step guided questionnaire           │
+│        Frontend (React 18 + Vite + Tailwind)  │  Vercel
+│  • Bilingual UI (English & हिन्दी)           │  Talks ONLY to Unified API
+│  • Multi-step guided questionnaire           │  VITE_API_BASE_URL=<render-url>
 │  • 1-Click Demo Persona Presets              │
 └──────────────────────┬───────────────────────┘
                        │ HTTPS / REST (JSON)
 ┌──────────────────────▼───────────────────────┐
-│              gateway-service                 │  Port 8000 (FastAPI)
-│  • Backend-For-Frontend (BFF) aggregator     │
-│  • Per-IP rate limiting (demo safety)        │
-│  • Structured error handling & fallbacks     │
-└───┬──────────────────────────────────────┬───┘
-    │                                      │
-┌───▼─────────────────────┐  ┌─────────────▼─────────────────────────┐
-│   eligibility-service   │  │           document-service            │
-│   Port 8001 (FastAPI)   │  │           Port 8002 (FastAPI)         │
-│  • Pure-Python Matcher  │  │  • Tesseract OCR engine               │
-│  • Source of truth:     │  │  • Vision LLM inspection              │
-│    schemes_dataset.json │  │  • Format & size validation (<5MB)    │
-│  • Bilingual Explainer  │  │  • Immediate memory disposal (DPDP)   │
-└─────────────────────────┘  └───────────────────────────────────────┘
+│         backend/ — Unified API (FastAPI)     │  Render (1 service)
+│  • POST /api/match (rule engine, in-process) │
+│  • POST /api/check-document (OCR+Vision)     │
+│  • Grievance + escalation engine             │
+│  • Per-IP rate limiting, /health, /health/all│
+└──────────────────────────────────────────────┘
 ```
+
+> Legacy layout (`services/gateway`, `services/eligibility`, `services/document`)
+> is kept for reference. All new development and deployment uses `backend/`.
 
 ---
 
@@ -57,9 +52,10 @@ No Docker required. Run the automated script from PowerShell:
 
 This launches:
 - **Frontend:** http://localhost:5173
-- **Gateway Service:** http://localhost:8000
-- **Eligibility Service:** http://localhost:8001
-- **Document Service:** http://localhost:8002
+- **Unified API:** http://localhost:8000 (`/health`, `/docs`, `/api/*`)
+
+> The old 3-process layout (ports 8000/8001/8002) is superseded.
+> `run_local` now starts only the unified `backend/` + frontend.
 
 ---
 
@@ -74,35 +70,31 @@ docker compose up --build
 
 ---
 
-### Running Individual Services Manually
+### Running Services Manually (Unified)
 
-1. **Eligibility Service:**
+1. **Unified Backend:**
    ```bash
-   cd services/eligibility
-   pip install -r requirements.txt
-   uvicorn main:app --host 127.0.0.1 --port 8001
-   ```
-
-2. **Document Service:**
-   ```bash
-   cd services/document
-   pip install -r requirements.txt
-   uvicorn main:app --host 127.0.0.1 --port 8002
-   ```
-
-3. **Gateway Service:**
-   ```bash
-   cd services/gateway
+   cd backend
    pip install -r requirements.txt
    uvicorn main:app --host 127.0.0.1 --port 8000
    ```
 
-4. **Frontend:**
+2. **Frontend:**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
+
+### Deploying (Render × Vercel)
+
+- **Backend → Render (1 service):** `render.yaml` defines a single `yojana-sathi-api`
+  service with `rootDir: backend`, build `pip install -r requirements.txt`,
+  start `uvicorn main:app --host 0.0.0.0 --port $PORT`, health check `/health`.
+  Set `ANTHROPIC_API_KEY` in the Render dashboard (optional — offline fallbacks included).
+- **Frontend → Vercel:** set `VITE_API_BASE_URL=https://<your-api>.onrender.com`
+  in the Vercel project environment, or update the rewrites in `frontend/vercel.json`.
+  Local dev needs no env var (Vite proxies `/api` + `/health*` to `localhost:8000`).
 
 ---
 
@@ -111,7 +103,10 @@ docker compose up --build
 All core matching rules and persona cases are covered by automated tests:
 
 ```bash
-# Run eligibility engine unit tests (100% pass on all 4 personas + edge cases)
+# Run unified backend tests (health, match, document, grievance)
+pytest backend/tests/test_unified.py
+
+# Legacy module tests (still pass, kept for reference)
 pytest services/eligibility/tests/test_matcher.py
 
 # Run document inspection and adversarial tests
@@ -143,9 +138,8 @@ Use this exact walkthrough during the hackathon pitch:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Claude API key for live bilingual explanations & vision checks *(optional: robust offline fallbacks built-in)* | `""` |
 | `LLM_MODEL` | Claude model identifier | `claude-3-5-sonnet-20241022` |
-| `GATEWAY_PORT` | Port for BFF Gateway service | `8000` |
-| `ELIGIBILITY_SERVICE_URL` | Eligibility service endpoint | `http://localhost:8001` |
-| `DOCUMENT_SERVICE_URL` | Document readiness service endpoint | `http://localhost:8002` |
+| `GATEWAY_PORT` | Port for unified backend (legacy name, still honored by scripts) | `8000` |
+| `PORT` | Port for unified backend (Render injects this automatically) | `8000` |
 | `LLM_TIMEOUT_SECONDS` | Network timeout for LLM calls before falling back | `8` |
 
 ---

@@ -117,7 +117,7 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
   const [activeStep, setActiveStep] = useState(1);
 
   const t = {
-    quickSelect: language === 'hi' ? 'त्वरित डेमो प्रोफाइल चुनें (Quick Demo):' : 'Try Quick Test Persona:',
+    quickSelect: language === 'hi' ? 'त्वरित प्रोफाइल चुनें:' : 'Try Quick Test Persona:',
     personalTab: language === 'hi' ? 'व्यक्तिगत विवरण' : 'Personal Details',
     locationTab: language === 'hi' ? 'स्थान व श्रेणी' : 'Location & Category',
     educationTab: language === 'hi' ? 'शिक्षा व कार्य' : 'Education & Work',
@@ -192,7 +192,7 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
           </button>
         </div>
 
-        {/* Quick Demo Persona Pickers */}
+        {/* Quick Persona Pickers */}
         <div className="mt-5 pt-4 border-t border-white/15">
           <span className="text-xs font-semibold uppercase tracking-wider text-emerald-200 block mb-2">
             {t.quickSelect}

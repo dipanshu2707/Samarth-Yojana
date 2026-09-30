@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: yojana-sathi-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: claude-3-5-sonnet-20241022
+      - key: LLM_TIMEOUT_SECONDS
+        value: "8"
+      - key: L1_NODAL_EMAIL
+        value: kumardp2707@gmail.com
+      - key: L1_PASSWORD
+        value: nodal123
+      - key: L2_COLLECTOR_EMAIL
+        value: manilal2357@gmail.com
+      - key: L2_PASSWORD
+        value: collector123
+      - key: L3_CMO_EMAIL
+        value: 0585mt241001@pimrbhopal.ac.in
+      - key: L3_PASSWORD
+        value: cmo123
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER
+        value: singhdp2707@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: MP CM Online
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: evidence

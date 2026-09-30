@@ -1,43 +1,13 @@
 version: '3.8'
 
 services:
-  gateway:
+  api:
     build:
-      context: ./services/gateway
+      context: ./backend
     ports:
       - "8000:8000"
     environment:
-      - GATEWAY_PORT=8000
-      - ELIGIBILITY_SERVICE_URL=http://eligibility:8001
-      - DOCUMENT_SERVICE_URL=http://document:8002
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - LLM_MODEL=${LLM_MODEL:-claude-sonnet-4-6}
-      - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-8}
-    depends_on:
-      - eligibility
-      - document
-    restart: unless-stopped
-
-  eligibility:
-    build:
-      context: ./services/eligibility
-    ports:
-      - "8001:8001"
-    volumes:
-      - ./schemes_dataset.json:/app/schemes_dataset.json:ro
-    environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - LLM_MODEL=${LLM_MODEL:-claude-sonnet-4-6}
-      - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-8}
-      - DATASET_PATH=/app/schemes_dataset.json
-    restart: unless-stopped
-
-  document:
-    build:
-      context: ./services/document
-    ports:
-      - "8002:8002"
-    environment:
+      - PORT=8000
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - LLM_MODEL=${LLM_MODEL:-claude-sonnet-4-6}
       - LLM_TIMEOUT_SECONDS=${LLM_TIMEOUT_SECONDS:-8}
@@ -49,5 +19,5 @@ services:
     ports:
       - "5173:5173"
     depends_on:
-      - gateway
+      - api
     restart: unless-stopped

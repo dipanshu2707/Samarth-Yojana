@@ -36,6 +36,13 @@ export default function App() {
   // Document Checker Modal state for Yojana Sathi
   const [activeDocCheck, setActiveDocCheck] = useState(null); // { scheme, documentName }
 
+  // Deep-link into the grievance Authority Desk login screen
+  const [officerSignal, setOfficerSignal] = useState(0);
+  const goAuthorityLogin = () => {
+    setActiveService('grievance');
+    setOfficerSignal((s) => s + 1);
+  };
+
   // Check backend health on initial mount
   useEffect(() => {
     async function checkHealth() {
@@ -209,8 +216,15 @@ export default function App() {
             </button>
           </nav>
 
-          {/* Right Controls: Language Switcher */}
+          {/* Right Controls: Authority login + Language Switcher */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={goAuthorityLogin}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-indigo-700 text-white shadow-sm transition-all"
+            >
+              <ShieldCheck className="w-4 h-4 text-amber-400" />
+              <span>{language === 'hi' ? 'प्राधिकारी लॉगिन' : 'Authority Login'}</span>
+            </button>
             <LanguageToggle language={language} onToggle={handleLanguageToggle} />
           </div>
         </div>
@@ -223,6 +237,7 @@ export default function App() {
           <GrievancePortal 
             language={language}
             onSwitchToYojana={() => setActiveService('yojana')}
+            officerSignal={officerSignal}
           />
         )}
 

@@ -107,3 +107,21 @@ button:focus-visible {
 .sla-active-pulse {
   animation: sla-glow 2s infinite ease-in-out;
 }
+
+/* Leaflet district labels on the MP heatmap */
+.leaflet-container {
+  font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+}
+.mp-label.leaflet-tooltip {
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
+}
+.mp-label.leaflet-tooltip::before {
+  display: none;
+}
