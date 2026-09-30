@@ -2,19 +2,19 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://yojana-sathi-api.onrender.com/api/$1"
+      "destination": "https://yojana-sathi-api-orro.onrender.com/api/$1"
     },
     {
       "source": "/health",
-      "destination": "https://yojana-sathi-api.onrender.com/health"
+      "destination": "https://yojana-sathi-api-orro.onrender.com/health"
     },
     {
       "source": "/health/all",
-      "destination": "https://yojana-sathi-api.onrender.com/health/all"
+      "destination": "https://yojana-sathi-api-orro.onrender.com/health/all"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://yojana-sathi-api.onrender.com/uploads/$1"
+      "destination": "https://yojana-sathi-api-orro.onrender.com/uploads/$1"
     },
     {
       "source": "/(.*)",
