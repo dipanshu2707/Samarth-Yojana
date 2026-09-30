@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
+import '../theme/app_theme.dart';
 
 Color workflowColor(String v) {
   switch (v) {
     case 'in_review':
-      return Colors.amber.shade700;
+      return Colors.amber.shade800;
     case 'in_progress':
       return Colors.indigo.shade700;
     case 'resolved':
-      return Colors.emerald.shade700;
+      return Colors.green.shade700;
     default:
-      return Colors.sky.shade700;
+      return Colors.lightBlue.shade700;
   }
 }
 
@@ -22,9 +23,9 @@ Color workflowBg(String v) {
     case 'in_progress':
       return Colors.indigo.shade50;
     case 'resolved':
-      return Colors.emerald.shade50;
+      return Colors.green.shade50;
     default:
-      return Colors.sky.shade50;
+      return Colors.lightBlue.shade50;
   }
 }
 
@@ -39,7 +40,7 @@ class StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: workflowBg(value),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: workflowColor(value).withOpacity(0.35)),
+        border: Border.all(color: workflowColor(value).withValues(alpha: 0.35)),
       ),
       child: Text(s.workflow(value), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: workflowColor(value))),
     );
@@ -52,11 +53,11 @@ class LevelPill extends StatelessWidget {
   const LevelPill({super.key, required this.level, required this.s});
   @override
   Widget build(BuildContext context) {
-    final c = level == 3 ? Colors.rose.shade700 : level == 2 ? Colors.amber.shade800 : Colors.blue.shade700;
-    final bg = level == 3 ? Colors.rose.shade50 : level == 2 ? Colors.amber.shade50 : Colors.blue.shade50;
+    final c = level == 3 ? Colors.red.shade700 : level == 2 ? Colors.amber.shade800 : Colors.blue.shade700;
+    final bg = level == 3 ? Colors.red.shade50 : level == 2 ? Colors.amber.shade50 : Colors.blue.shade50;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20), border: Border.all(color: c.withOpacity(0.35))),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20), border: Border.all(color: c.withValues(alpha: 0.35))),
       child: Text(s.level(level), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: c)),
     );
   }
@@ -140,13 +141,13 @@ class TimelineView extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 4),
                   decoration: BoxDecoration(
                     color: steps[i].stage == 'RESOLVED'
-                        ? Colors.emerald
+                        ? Colors.green
                         : steps[i].stage.startsWith('L3')
-                            ? Colors.rose
+                            ? Colors.red
                             : steps[i].stage.startsWith('L2')
                                 ? Colors.amber.shade700
                                 : steps[i].stage.startsWith('EMAIL')
-                                    ? Colors.sky
+                                    ? Colors.lightBlue
                                     : Colors.indigo,
                     shape: BoxShape.circle,
                   ),
@@ -183,15 +184,15 @@ class TicketCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 0,
-      color: Colors.white,
+      color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE2E8F0)), borderRadius: BorderRadius.circular(18)),
+          decoration: cardDec(radius: 20),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 6, runSpacing: 6, children: [
               Text(t.ticketId, style: const TextStyle(fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.indigo)),
@@ -216,9 +217,9 @@ class ErrorBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.rose.shade50, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.rose.shade200)),
+      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red.shade200)),
       child: Row(children: [
-        const Icon(Icons.error_outline, color: Colors.rose, size: 20),
+        const Icon(Icons.error_outline, color: Colors.red, size: 20),
         const SizedBox(width: 8),
         Expanded(child: Text(message, style: const TextStyle(fontSize: 12, color: Color(0xFF9F1239)))),
       ]),

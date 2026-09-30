@@ -8,6 +8,7 @@ import FindByMobile from './grievance/FindByMobile';
 import OfficerDesk from './grievance/OfficerDesk';
 import TicketDossier from './grievance/TicketDossier';
 import MpHeatmap from './grievance/MpHeatmap';
+import ServerWakeButton from './grievance/ServerWakeButton';
 import { trackGrievance, fetchHotspots, listGrievances } from '../api/client';
 
 export default function GrievancePortal({ language = 'en', onSwitchToYojana, officerSignal = 0 }) {
@@ -122,6 +123,7 @@ export default function GrievancePortal({ language = 'en', onSwitchToYojana, off
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
                 <PhoneCall className="w-3.5 h-3.5" /> Helpline 181
               </span>
+              <ServerWakeButton language={language} compact />
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">{t.title}</h1>
             <p className="text-sm sm:text-base text-slate-300">{t.subtitle}</p>

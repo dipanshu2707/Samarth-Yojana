@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
-import 'screens/home_screen.dart';
+import 'screens/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,9 +38,9 @@ class MpOnlineApp extends StatelessWidget {
             textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
           ),
         ),
-        cardTheme: const CardTheme(color: Colors.white),
+        cardTheme: const CardThemeData(color: Colors.white),
       ),
-      home: const HomeScreen(),
+      home: const AppShell(),
       locale: Locale(app.lang == 'hi' ? 'hi' : 'en'),
     );
   }

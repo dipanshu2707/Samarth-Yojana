@@ -1,18 +1,16 @@
-import 'package:flutter/foundation.dart';
-
-/// Backend base URL resolution.
+/// Backend base URL resolution (see ApiConfig below).
 /// - Android emulator: 10.0.2.2 maps to the host machine.
 /// - Anything else local: localhost.
 /// Overridable at runtime in Settings (persisted).
 class ApiConfig {
+  static const String renderBase = 'https://yojana-sathi-api-orro.onrender.com';
+
   static String defaultBaseUrl() {
     const fromDefine = String.fromEnvironment('API_BASE_URL');
     if (fromDefine.isNotEmpty) return fromDefine;
-    if (!kIsWeb &&
-        defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8000';
-    }
-    return 'http://localhost:8000';
+    // Production backend. The Settings screen can override this
+    // (emulator: http://10.0.2.2:8000, USB: http://127.0.0.1:8000).
+    return renderBase;
   }
 }
 

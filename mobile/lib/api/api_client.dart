@@ -177,4 +177,22 @@ class Api {
     if (r.statusCode != 200) throw _err(r, 'Test delivery failed');
     return jsonDecode(r.body) as Map<String, dynamic>;
   }
+
+  /// Wake a sleeping free-tier server: poll /health until it answers.
+  /// Returns true when the backend is up. Throws the last error on timeout.
+  Future<bool> wakeServer({int tries = 12, Duration gap = const Duration(seconds: 8), void Function(int attempt)? onAttempt}) async {
+    Object? last;
+    for (int i = 1; i <= tries; i++) {
+      onAttempt?.call(i);
+      try {
+        final r = await http.get(Uri.parse('$base/health')).timeout(const Duration(seconds: 10));
+        if (r.statusCode == 200) return true;
+        last = ApiException('Server answered ${r.statusCode}');
+      } catch (e) {
+        last = e;
+      }
+      if (i < tries) await Future.delayed(gap);
+    }
+    throw last ?? ApiException('Server did not wake up');
+  }
 }

@@ -17,7 +17,8 @@ const mpDistricts = [
 ];
 
 class FileComplaintScreen extends StatefulWidget {
-  const FileComplaintScreen({super.key});
+  final String? initialDept;
+  const FileComplaintScreen({super.key, this.initialDept});
   @override
   State<FileComplaintScreen> createState() => _FileComplaintScreenState();
 }
@@ -54,6 +55,10 @@ class _FileComplaintScreenState extends State<FileComplaintScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialDept != null) {
+      deptId = widget.initialDept!;
+      step = 1;
+    }
     _loadDepts();
   }
 
@@ -64,7 +69,7 @@ class _FileComplaintScreenState extends State<FileComplaintScreen> {
       setState(() {
         depts = d;
         loadingDepts = false;
-        if (d.isNotEmpty) deptId = d.first.id;
+        if (widget.initialDept == null && d.isNotEmpty) deptId = d.first.id;
       });
     } catch (e) {
       if (!mounted) return;
@@ -202,8 +207,8 @@ class _FileComplaintScreenState extends State<FileComplaintScreen> {
             width: double.infinity,
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.emerald.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.emerald.shade200)),
-            child: Text('Registered: ${receipt!.ticketId}', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.emerald.shade800, fontSize: 15)),
+            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.green.shade200)),
+            child: Text('Registered: ${receipt!.ticketId}', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.green.shade800, fontSize: 15)),
           ),
           Expanded(child: TicketDetail(t: receipt!)),
         ]),
@@ -328,7 +333,7 @@ class _FileComplaintScreenState extends State<FileComplaintScreen> {
                               onPressed: _toggleVoice,
                               icon: Icon(listening ? Icons.stop : Icons.mic),
                               label: Text(listening ? 'Stop' : (app.lang == 'hi' ? 'बोलें' : 'Speak')),
-                              style: ElevatedButton.styleFrom(backgroundColor: listening ? Colors.rose : Colors.indigo, foregroundColor: Colors.white),
+                              style: ElevatedButton.styleFrom(backgroundColor: listening ? Colors.red : Colors.indigo, foregroundColor: Colors.white),
                             ),
                           ),
                         ]),

@@ -9,12 +9,12 @@ import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
-import 'track_ticket_screen.dart';
+import 'tracking_screens.dart';
 
 Color _intensityColor(String v) {
   switch (v) {
     case 'Severe':
-      return Colors.rose;
+      return Colors.red;
     case 'Elevated':
       return Colors.amber;
     default:
@@ -25,7 +25,7 @@ Color _intensityColor(String v) {
 Color _intensityDark(String v) {
   switch (v) {
     case 'Severe':
-      return Colors.rose.shade900;
+      return Colors.red.shade900;
     case 'Elevated':
       return Colors.amber.shade900;
     default:
@@ -127,7 +127,7 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: (g.priority == 'Critical' ? Colors.red : g.priority == 'High' ? Colors.orange : Colors.yellow.shade700)
-                    .withOpacity(0.25 + inten * 0.45),
+                    .withValues(alpha: 0.25 + inten * 0.45),
               ),
             ),
           ),
@@ -145,7 +145,7 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(color: const Color(0xFF0F172A).withOpacity(0.88), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: const Color(0xFF0F172A).withValues(alpha: 0.88), borderRadius: BorderRadius.circular(10)),
               child: Text('$district • ${list.length}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
             ),
             Container(
@@ -153,7 +153,7 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
               height: size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(0.30),
+                color: color.withValues(alpha: 0.30),
                 border: Border.all(color: color, width: 2.5),
               ),
               child: Center(child: Text('${list.length}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: dark))),
@@ -189,11 +189,11 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: Colors.emerald.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
-              child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.circle, color: Colors.emeraldAccent, size: 8),
+              decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.circle, color: Colors.greenAccent, size: 8),
                 SizedBox(width: 4),
-                Text('LIVE', style: TextStyle(color: Colors.emeraldAccent, fontSize: 10, fontWeight: FontWeight.w900)),
+                Text('LIVE', style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.w900)),
               ]),
             ),
           ]),
@@ -223,6 +223,7 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
               TileLayer(
                 urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
                 userAgentPackageName: 'gov.mp.mponline',
+                retinaMode: true,
               ),
               MarkerLayer(markers: markers),
             ],
@@ -281,7 +282,7 @@ class _HotspotsScreenState extends State<HotspotsScreen> {
                                 Expanded(child: Text(h.district, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14))),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(color: c.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+                                  decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
                                   child: Text('${h.intensity} • ${h.total}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: c)),
                                 ),
                               ]),

@@ -105,9 +105,9 @@ class _OfficerDeskScreenState extends State<OfficerDeskScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: selected ? c : c.withOpacity(0.10),
+              color: selected ? c : c.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: c.withOpacity(0.4)),
+              border: Border.all(color: c.withValues(alpha: 0.4)),
             ),
             child: Column(children: [
               Text('${count(key)}',
@@ -122,13 +122,13 @@ class _OfficerDeskScreenState extends State<OfficerDeskScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
       child: Row(children: [
-        cell('open', s.open, Colors.sky.shade700),
+        cell('open', s.open, Colors.lightBlue.shade700),
         const SizedBox(width: 8),
         cell('in_review', s.inReview, Colors.amber.shade700),
         const SizedBox(width: 8),
         cell('in_progress', s.inProgress, Colors.indigo.shade700),
         const SizedBox(width: 8),
-        cell('resolved', s.resolved, Colors.emerald.shade700),
+        cell('resolved', s.resolved, Colors.green.shade700),
       ]),
     );
   }
@@ -346,7 +346,7 @@ class _OfficerCaseScreenState extends State<OfficerCaseScreen> {
                 onPressed: busy || remark.text.isEmpty
                     ? null
                     : () => _run(() => api.setStatus(t.ticketId, 'resolved', o.name, o.designation, remark.text)),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.emerald),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 child: const Text('Resolve', style: TextStyle(fontSize: 12)),
               ),
           ]),

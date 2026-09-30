@@ -195,7 +195,7 @@ class _YojanaScreenState extends State<YojanaScreen> {
               elevation: 0,
               child: Container(
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(border: Border.all(color: Colors.emerald.shade200), borderRadius: BorderRadius.circular(16), color: Colors.emerald.shade50),
+                decoration: BoxDecoration(border: Border.all(color: Colors.green.shade200), borderRadius: BorderRadius.circular(16), color: Colors.green.shade50),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('${m['name'] ?? ''}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
                   Text('${m['confidence'] ?? ''} • ${m['benefits'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),

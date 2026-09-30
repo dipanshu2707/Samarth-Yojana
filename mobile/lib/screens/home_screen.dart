@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api/api_client.dart';
 import '../l10n/strings.dart';
+import '../models/models.dart';
 import '../state/app_state.dart';
-import '../widgets/common.dart';
+import '../theme/app_theme.dart';
+import '../widgets/server_status.dart';
 import 'file_complaint_screen.dart';
-import 'find_mobile_screen.dart';
-import 'track_ticket_screen.dart';
-import 'hotspots_screen.dart';
+import 'tracking_screens.dart';
 import 'authority_login_screen.dart';
 import 'officer_desk_screen.dart';
 import 'yojana_screen.dart';
@@ -21,139 +21,198 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _liveCount = 0;
+  List<Department> depts = [];
+  final quickId = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadCount();
+    Api(context.read<AppState>().baseUrl).departments().then((d) {
+      if (mounted) setState(() => depts = d);
+    }).catchError((_) => null);
   }
 
-  Future<void> _loadCount() async {
-    try {
-      final api = Api(context.read<AppState>().baseUrl);
-      final list = await api.list();
-      if (mounted) setState(() => _liveCount = list.length);
-    } catch (_) {}
+  @override
+  void dispose() {
+    quickId.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     final s = S(app.lang);
-    final api = Api(app.baseUrl);
     final loggedIn = app.officer != null;
 
-    Widget tile(IconData icon, Color color, String label, VoidCallback onTap, {String? badge}) {
-      return InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(14)),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const Spacer(),
-              if (badge != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: Colors.emerald.shade50, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.emerald.shade200)),
-                  child: Text(badge, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.emerald.shade700)),
-                ),
-            ]),
-            const SizedBox(height: 12),
-            Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-          ]),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: AppColors.paper,
       body: RefreshIndicator(
-        onRefresh: _loadCount,
+        onRefresh: () async => setState(() {}),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(children: [
-            GradientHeader(
-              title: s.appName,
-              subtitle: '${s.tagline} • $_liveCount live cases',
-              badges: [
-                _badge('MP CM Online', Colors.amber),
-                _badge('L1 → L2 → L3', Colors.emerald),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
+            // Hero
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 54, 20, 96),
+              decoration: const BoxDecoration(gradient: AppColors.hero, borderRadius: BorderRadius.vertical(bottom: Radius.circular(32))),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => launchUrl(Uri(scheme: 'tel', path: '181')),
-                      icon: const Icon(Icons.call, size: 16),
-                      label: Text(s.helpline, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                    ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(color: AppColors.saffron.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.saffron.withValues(alpha: 0.5))),
+                    child: const Text('MP CM ONLINE • 181', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.saffron)),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-                      icon: const Icon(Icons.settings, size: 16),
-                      label: Text(s.settings, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  const Spacer(),
+                  InkWell(
+                    onTap: () => app.setLang(app.lang == 'hi' ? 'en' : 'hi'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+                      child: Text(app.lang == 'hi' ? 'EN' : 'हिं', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900)),
                     ),
                   ),
                 ]),
-                const SectionTitle(text: 'Citizen services'),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1.25,
-                  children: [
-                    tile(Icons.edit_document, Colors.indigo, s.fileComplaint,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FileComplaintScreen()))),
-                    tile(Icons.smartphone, Colors.blue, s.findByMobile,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FindMobileScreen()))),
-                    tile(Icons.search, Colors.teal, s.trackByTicket,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TrackTicketScreen()))),
-                    tile(Icons.local_fire_department, Colors.orange, s.hotspots,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HotspotsScreen()))),
-                    tile(Icons.spa, Colors.emerald, s.yojana,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const YojanaScreen()))),
-                    tile(
-                      loggedIn ? Icons.shield : Icons.key,
-                      Colors.deepPurple,
-                      loggedIn ? '${s.officerDesk} (${app.officer!.name})' : s.authorityLogin,
-                      () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => loggedIn ? const OfficerDeskScreen() : const AuthorityLoginScreen())),
-                      badge: loggedIn ? 'L${app.officer!.level}' : null,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => app.setLang(app.lang == 'hi' ? 'en' : 'hi'),
-                      child: Text(app.lang == 'hi' ? 'Switch to English' : 'हिन्दी में देखें',
-                          style: const TextStyle(fontWeight: FontWeight.w800)),
-                    ),
-                  ),
-                ]),
+                const SizedBox(height: 14),
+                Text(app.lang == 'hi' ? 'नमस्ते 🙏\nशिकायत दर्ज करें' : 'Namaste 🙏\nReport an issue', style: AppText.hero),
+                const SizedBox(height: 6),
+                Text(s.tagline, style: AppText.heroSub),
               ]),
+            ),
+            // Quick track card overlapping hero
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Transform.translate(
+                offset: const Offset(0, -58),
+                child: Column(children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: cardDec(),
+                    child: Column(children: [
+                      Row(children: [
+                        Expanded(
+                          child: TextField(
+                            controller: quickId,
+                            decoration: InputDecoration(
+                              hintText: 'Ticket ID • MP-CMO-2026-XXXXX',
+                              hintStyle: const TextStyle(fontSize: 12),
+                              prefixIcon: const Icon(Icons.confirmation_number, size: 18),
+                              filled: true,
+                              fillColor: AppColors.paper,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                            ),
+                            onSubmitted: (_) => _openTrack(),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: _openTrack,
+                          child: Container(
+                            padding: const EdgeInsets.all(13),
+                            decoration: BoxDecoration(gradient: AppColors.saffronGlow, borderRadius: BorderRadius.circular(14)),
+                            child: const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ]),
+                      const SizedBox(height: 10),
+                      const ServerStatusStrip(),
+                    ]),
+                  ),
+                  const SizedBox(height: 14),
+                  // Report by department
+                  Row(children: [
+                    Text(app.lang == 'hi' ? 'विभाग चुनें' : 'Report by department', style: AppText.section),
+                  ]),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 10, crossAxisSpacing: 10, childAspectRatio: 0.92),
+                    itemCount: depts.isEmpty ? 5 : depts.length,
+                    itemBuilder: (_, i) {
+                      if (depts.isEmpty) {
+                        return Container(decoration: cardDec(radius: 18), child: const Center(child: CircularProgressIndicator(strokeWidth: 2)));
+                      }
+                      final d = depts[i];
+                      final c = deptColor(d.id);
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FileComplaintScreen(initialDept: d.id))),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: cardDec(radius: 18),
+                          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: c.withValues(alpha: 0.12), shape: BoxShape.circle),
+                              child: Icon(deptIcon(d.id), color: c, size: 22),
+                            ),
+                            const SizedBox(height: 6),
+                            Text((app.lang == 'hi' ? d.nameHi : d.nameEn).split('(').first.trim(),
+                                textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800)),
+                          ]),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  // Secondary services
+                  Row(children: [
+                    _service(
+                      Icons.smartphone, AppColors.indigo600, app.lang == 'hi' ? 'मोबाइल से खोजें' : 'Find by mobile',
+                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FindMobileScreen())),
+                    ),
+                    const SizedBox(width: 10),
+                    _service(
+                      Icons.spa, const Color(0xFF059669), s.yojana,
+                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const YojanaScreen())),
+                    ),
+                  ]),
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    _service(
+                      loggedIn ? Icons.shield : Icons.key,
+                      const Color(0xFF7C3AED),
+                      loggedIn ? '${app.officer!.name} • L${app.officer!.level}' : s.authorityLogin,
+                      () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => loggedIn ? const OfficerDeskScreen() : const AuthorityLoginScreen())),
+                    ),
+                    const SizedBox(width: 10),
+                    _service(Icons.settings, AppColors.muted, s.settings,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()))),
+                  ]),
+                  const SizedBox(height: 14),
+                  // Helpline banner
+                  InkWell(
+                    onTap: () => launchUrl(Uri(scheme: 'tel', path: '181')),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF7C2D12), Color(0xFFB45309)]),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
+                          child: const Icon(Icons.call, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(s.helpline, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900)),
+                            const Text('Toll-free • 24×7 CM Helpline', style: TextStyle(color: Color(0xFFFDE68A), fontSize: 11)),
+                          ]),
+                        ),
+                        const Icon(Icons.chevron_right, color: Colors.white),
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(height: 90),
+                ]),
+              ),
             ),
           ]),
         ),
@@ -161,11 +220,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _badge(String text, Color c) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: c.withOpacity(0.15), borderRadius: BorderRadius.circular(20), border: Border.all(color: c.withOpacity(0.4))),
-      child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: c)),
+  Widget _service(IconData icon, Color c, String label, VoidCallback onTap) {
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          decoration: cardDec(radius: 18),
+          child: Column(children: [
+            Icon(icon, color: c, size: 22),
+            const SizedBox(height: 6),
+            Text(label, textAlign: TextAlign.center, maxLines: 2, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+          ]),
+        ),
+      ),
     );
+  }
+
+  void _openTrack() {
+    if (quickId.text.trim().isEmpty) return;
+    Navigator.push(context, MaterialPageRoute(builder: (_) => TrackTicketScreen(initialId: quickId.text.trim())));
   }
 }
