@@ -74,6 +74,14 @@ class ApprovalRequestItem(BaseModel):
     response_comment: Optional[str] = None
     responded_at: Optional[str] = None
 
+class EmailLogItem(BaseModel):
+    timestamp: str
+    to: str = ""
+    provider: str = "none"
+    ok: bool = False
+    error: Optional[str] = None
+    subject: Optional[str] = None
+
 class GrievanceSubmitRequest(BaseModel):
     citizen_name: str
     auth_type: str = "aadhaar"
@@ -175,14 +183,6 @@ class GrievanceResolveRequest(BaseModel):
     officer_designation: str
     resolution_note: str
     evidence_url: Optional[str] = None
-
-class EmailLogItem(BaseModel):
-    timestamp: str
-    to: str = ""
-    provider: str = "none"
-    ok: bool = False
-    error: Optional[str] = None
-    subject: Optional[str] = None
 
 class EmailTestRequest(BaseModel):
     to: str
