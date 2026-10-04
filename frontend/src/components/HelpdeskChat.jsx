@@ -306,7 +306,9 @@ export default function HelpdeskChat({ language = 'en' }) {
               <div>
                 <p className="text-sm font-bold leading-tight">{language === 'hi' ? 'सहायता चैट' : 'Helpdesk AI'}</p>
                 <p className="text-[11px] text-white/60">
-                  {status?.configured ? `● ${status.model}` : language === 'hi' ? 'जुड़ रहा है…' : 'connecting…'}
+                  {status
+                    ? <span className="text-emerald-300">● {language === 'hi' ? 'ऑनलाइन' : 'Online'}</span>
+                    : (language === 'hi' ? 'जुड़ रहा है…' : 'connecting…')}
                 </p>
               </div>
             </div>
