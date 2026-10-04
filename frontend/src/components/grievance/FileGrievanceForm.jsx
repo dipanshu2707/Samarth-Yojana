@@ -77,7 +77,9 @@ export default function FileGrievanceForm({ language = 'en', onFiled }) {
 
   const applyPersona = (p) => {
     setForm({
-      citizen_name: p.data.citizen_name, auth_type: p.data.auth_type, auth_id: p.data.auth_id, mobile: p.data.mobile,
+      citizen_name: p.data.citizen_name, auth_type: p.data.auth_type,
+      auth_id: p.data.auth_type === 'aadhaar' ? p.data.auth_id.replace(/\D/g, '').slice(0, 12) : p.data.auth_id,
+      mobile: p.data.mobile,
       citizen_email: p.data.citizen_email || '',
       district: p.data.district, block_or_ward: p.data.block_or_ward, region_type: p.data.region_type,
       address: p.data.address, dept_id: p.data.dept_id, title: p.data.title, description: p.data.description,
@@ -118,6 +120,10 @@ export default function FileGrievanceForm({ language = 'en', onFiled }) {
     }
     if (!form.mobile.replace(/\D/g, '')) {
       setError(language === 'hi' ? 'ट्रैकिंग हेतु मोबाइल नंबर आवश्यक है।' : 'Mobile number is required for tracking.');
+      return;
+    }
+    if (form.auth_type === 'aadhaar' && !/^\d{12}$/.test(form.auth_id)) {
+      setError(language === 'hi' ? 'आधार संख्या में ठीक 12 अंक होने चाहिए।' : 'Aadhaar number must contain exactly 12 digits.');
       return;
     }
     if (form.citizen_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.citizen_email.trim())) {
@@ -213,16 +219,43 @@ export default function FileGrievanceForm({ language = 'en', onFiled }) {
               <label className="block text-xs font-semibold text-slate-700 mb-1">Email for receipt + status updates (optional, real delivery)</label>
               <input type="email" value={form.citizen_email} onChange={(e) => setForm({ ...form, citizen_email: e.target.value })} placeholder="you@example.com" className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Aadhaar / PAN *</label>
-                <div className="flex gap-2">
-                  <select value={form.auth_type} onChange={(e) => setForm({ ...form, auth_type: e.target.value })} className="px-2 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50">
+                <div className="flex min-w-0 gap-2">
+                  <select
+                    value={form.auth_type}
+                    onChange={(e) => {
+                      const authType = e.target.value;
+                      const authId = authType === 'aadhaar' ? form.auth_id.replace(/\D/g, '').slice(0, 12) : form.auth_id;
+                      setForm({ ...form, auth_type: authType, auth_id: authId });
+                    }}
+                    className="w-[104px] shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-2 py-2.5 text-xs font-bold"
+                  >
                     <option value="aadhaar">Aadhaar</option>
                     <option value="pan">PAN</option>
                   </select>
-                  <input value={form.auth_id} onChange={(e) => setForm({ ...form, auth_id: e.target.value })} placeholder="ID" className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                  <input
+                    value={form.auth_id}
+                    onChange={(e) => setForm({
+                      ...form,
+                      auth_id: form.auth_type === 'aadhaar'
+                        ? e.target.value.replace(/\D/g, '').slice(0, 12)
+                        : e.target.value,
+                    })}
+                    placeholder={form.auth_type === 'aadhaar' ? '12 digits' : 'PAN'}
+                    inputMode={form.auth_type === 'aadhaar' ? 'numeric' : 'text'}
+                    maxLength={form.auth_type === 'aadhaar' ? 12 : undefined}
+                    pattern={form.auth_type === 'aadhaar' ? '[0-9]{12}' : undefined}
+                    aria-describedby="auth-id-hint"
+                    autoComplete="off"
+                    required
+                    className="w-full min-w-0 rounded-xl border border-slate-200 px-3 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
                 </div>
+                <p id="auth-id-hint" className="mt-1 text-[11px] text-slate-500">
+                  {form.auth_type === 'aadhaar' ? 'Enter exactly 12 digits.' : 'Enter your PAN number.'}
+                </p>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">District *</label>

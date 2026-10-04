@@ -19,9 +19,9 @@ Yojana Sathi helps citizens of Madhya Pradesh find government welfare and schola
 
 ```
 ┌──────────────────────────────────────────────┐
-│        Frontend (React 18 + Vite + Tailwind)  │  Vercel
-│  • Bilingual UI (English & हिन्दी)           │  Talks ONLY to Unified API
-│  • Multi-step guided questionnaire           │  VITE_API_BASE_URL=<render-url>
+│        Frontend (Next.js App Router + Tailwind)│  Vercel
+│  • Bilingual UI (English & हिन्दी)             │  Talks ONLY to Unified API
+│  • Multi-step guided questionnaire             │  NEXT_PUBLIC_API_BASE_URL=<render-url>
 │  • 1-Click Demo Persona Presets              │
 └──────────────────────┬───────────────────────┘
                        │ HTTPS / REST (JSON)
@@ -92,9 +92,9 @@ docker compose up --build
   service with `rootDir: backend`, build `pip install -r requirements.txt`,
   start `uvicorn main:app --host 0.0.0.0 --port $PORT`, health check `/health`.
   Set `ANTHROPIC_API_KEY` in the Render dashboard (optional — offline fallbacks included).
-- **Frontend → Vercel:** set `VITE_API_BASE_URL=https://<your-api>.onrender.com`
+- **Frontend → Vercel:** set `NEXT_PUBLIC_API_BASE_URL=https://<your-api>.onrender.com`
   in the Vercel project environment, or update the rewrites in `frontend/vercel.json`.
-  Local dev needs no env var (Vite proxies `/api` + `/health*` to `localhost:8000`).
+  Local dev needs no env var (Next.js rewrites `/api` + `/health*` to `localhost:8000`).
 
 ---
 

@@ -167,16 +167,16 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden">
+    <div className="overflow-hidden rounded-[26px] border border-[#dce4ed] bg-white shadow-lg shadow-[#17243a]/[0.06]">
       {/* Header bar */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-800 p-6 text-white">
+      <div className="border-b border-[#d5deda] bg-[#f7f9f7] p-6 text-[#172a2a]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl md:text-2xl font-bold font-heading flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-amber-300" />
+            <h2 className="flex items-center gap-2 text-xl font-bold md:text-2xl">
+              <Sparkles className="h-6 w-6 text-[#155b4a]" />
               {language === 'hi' ? 'नागरिक पात्रता प्रश्नावली' : 'Citizen Eligibility Questionnaire'}
             </h2>
-            <p className="text-emerald-100 text-sm mt-1">
+            <p className="mt-1 text-sm leading-6 text-[#64736e]">
               {language === 'hi'
                 ? '8 सरल प्रश्नों के उत्तर दें और जानें आप मध्य प्रदेश की किन योजनाओं के लिए पात्र हैं।'
                 : 'Answer a few structured questions to check eligibility across 13+ MP & Central schemes.'}
@@ -185,7 +185,7 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
           <button
             type="button"
             onClick={() => setFormData(INITIAL_FORM)}
-            className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white border border-white/20 self-start md:self-auto"
+            className="inline-flex min-h-9 items-center border border-[#c9d5cf] px-3 py-1.5 text-xs font-semibold text-[#155b4a] transition-colors hover:bg-[#edf3ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#155b4a] self-start md:self-auto"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" />
             {t.reset}
@@ -193,8 +193,8 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
         </div>
 
         {/* Quick Persona Pickers */}
-        <div className="mt-5 pt-4 border-t border-white/15">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-200 block mb-2">
+        <div className="mt-5 border-t border-[#d5deda] pt-4">
+          <span className="mb-2 block text-xs font-semibold text-[#52635b]">
             {t.quickSelect}
           </span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -203,13 +203,13 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
                 key={p.name}
                 type="button"
                 onClick={() => handleApplyPersona(p)}
-                className="text-left bg-white/10 hover:bg-white/25 active:bg-white/30 backdrop-blur-sm p-2 rounded-xl border border-white/20 transition-all text-white group"
+                className="border border-[#d5deda] bg-white p-2 text-left text-[#172a2a] transition-colors hover:border-[#78b9ae] hover:bg-[#f2f7f4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#155b4a]"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-amber-300 group-hover:underline">{p.name}</span>
-                  <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded text-white">{p.tag}</span>
+                  <span className="text-sm font-bold text-[#155b4a]">{p.name}</span>
+                  <span className="text-[10px] text-[#64736e]">{p.tag}</span>
                 </div>
-                <p className="text-[11px] text-emerald-100 truncate mt-0.5">{p.description}</p>
+                <p className="mt-0.5 truncate text-[11px] text-[#64736e]">{p.description}</p>
               </button>
             ))}
           </div>
@@ -217,45 +217,45 @@ export default function EligibilityForm({ onSubmit, isLoading, language }) {
       </div>
 
       {/* Multi-Step Tabs */}
-      <div className="flex border-b border-slate-200 bg-slate-50/80 text-xs font-medium overflow-x-auto">
+      <div className="flex overflow-x-auto border-b border-[#d5deda] bg-[#f7f9f7] text-xs font-medium">
         <button
           type="button"
           onClick={() => setActiveStep(1)}
-          className={`flex items-center gap-1.5 px-4 py-3 border-b-2 whitespace-nowrap transition-all ${
-            activeStep === 1 ? 'border-emerald-600 text-emerald-700 bg-white font-bold' : 'border-transparent text-slate-600 hover:text-slate-900'
+          className={`flex min-h-12 items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#155b4a] ${
+            activeStep === 1 ? 'border-[#155b4a] bg-white font-bold text-[#155b4a]' : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
-          <User className="w-4 h-4 text-emerald-600" />
+          <User className="w-4 h-4 text-[var(--color-blue)]" />
           <span>1. {t.personalTab}</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveStep(2)}
-          className={`flex items-center gap-1.5 px-4 py-3 border-b-2 whitespace-nowrap transition-all ${
-            activeStep === 2 ? 'border-emerald-600 text-emerald-700 bg-white font-bold' : 'border-transparent text-slate-600 hover:text-slate-900'
+          className={`flex min-h-12 items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-blue)] ${
+            activeStep === 2 ? 'border-[var(--color-blue)] bg-white font-bold text-[var(--color-blue)]' : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
-          <MapPin className="w-4 h-4 text-emerald-600" />
+          <MapPin className="w-4 h-4 text-[var(--color-blue)]" />
           <span>2. {t.locationTab}</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveStep(3)}
-          className={`flex items-center gap-1.5 px-4 py-3 border-b-2 whitespace-nowrap transition-all ${
-            activeStep === 3 ? 'border-emerald-600 text-emerald-700 bg-white font-bold' : 'border-transparent text-slate-600 hover:text-slate-900'
+          className={`flex min-h-12 items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-blue)] ${
+            activeStep === 3 ? 'border-[var(--color-blue)] bg-white font-bold text-[var(--color-blue)]' : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
-          <GraduationCap className="w-4 h-4 text-emerald-600" />
+          <GraduationCap className="w-4 h-4 text-[var(--color-blue)]" />
           <span>3. {t.educationTab}</span>
         </button>
         <button
           type="button"
           onClick={() => setActiveStep(4)}
-          className={`flex items-center gap-1.5 px-4 py-3 border-b-2 whitespace-nowrap transition-all ${
-            activeStep === 4 ? 'border-emerald-600 text-emerald-700 bg-white font-bold' : 'border-transparent text-slate-600 hover:text-slate-900'
+          className={`flex min-h-12 items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-blue)] ${
+            activeStep === 4 ? 'border-[var(--color-blue)] bg-white font-bold text-[var(--color-blue)]' : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
-          <IndianRupee className="w-4 h-4 text-emerald-600" />
+          <IndianRupee className="w-4 h-4 text-[var(--color-blue)]" />
           <span>4. {t.incomeTab}</span>
         </button>
       </div>

@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Building, 
   Building2,
-  CheckCircle2, 
   AlertCircle, 
-  RefreshCw, 
   Sparkles, 
   ShieldCheck, 
-  HeartHandshake,
-  Layers,
-  ArrowRight,
   Landmark,
   FileCheck2,
   PhoneCall,
-  ChevronRight,
-  Globe2
 } from 'lucide-react';
 import LanguageToggle from './components/LanguageToggle';
 import EligibilityForm from './components/EligibilityForm';
 import ResultsList from './components/ResultsList';
 import DocumentUpload from './components/DocumentUpload';
 import GrievancePortal from './components/GrievancePortal';
+import HelpdeskChat from './components/HelpdeskChat';
 import { checkSystemHealth, submitEligibilityMatch } from './api/client';
 
 export default function App() {
@@ -44,6 +37,10 @@ export default function App() {
   };
 
   // Check backend health on initial mount
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   useEffect(() => {
     async function checkHealth() {
       try {
@@ -104,9 +101,6 @@ export default function App() {
   const t = {
     govTitle: language === 'hi' ? 'मध्य प्रदेश शासन' : 'Government of Madhya Pradesh',
     govSubtitle: language === 'hi' ? 'नागरिक सेवा एवं लोक शिकायत प्रबंधन' : 'Citizen Public Services & Grievance Governance',
-    serviceGrievance: language === 'hi' ? '🏛️ सीएम ऑनलाइन (जन-शिकायत 181)' : '🏛️ MP CM Online (Grievance)',
-    serviceYojana: language === 'hi' ? '📜 योजना साथी (कल्याणकारी योजनाएं)' : '📜 Yojana Sathi (Schemes & OCR)',
-    badgeHackathon: 'MPOnline Idea & Innovation Hackathon 2026',
     statusOnline: language === 'hi' ? 'सेवाएं ऑनलाइन' : 'Services Online',
     statusDegraded: language === 'hi' ? 'बैकअप मोड' : 'Fallback Active',
     statusOffline: language === 'hi' ? 'ऑफ़लाइन' : 'Backend Offline',
@@ -123,115 +117,92 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100/70 text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white">
-      {/* Supreme Government Header Banner */}
-      <div className="bg-slate-900 text-slate-300 border-b border-slate-800 text-[11px] py-1.5 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              {t.govTitle} • {t.govSubtitle}
-            </span>
-            <span className="hidden md:inline text-slate-500">|</span>
-            <span className="hidden md:inline text-slate-400">
-              {t.badgeHackathon}
-            </span>
+    <div className="min-h-screen bg-[var(--color-cloud)] text-[var(--color-ink)] antialiased selection:bg-[var(--color-blue)] selection:text-white lg:flex">
+      <aside className="relative z-30 flex w-full flex-col gap-4 bg-[var(--color-ink)] px-4 py-4 text-white lg:sticky lg:top-0 lg:h-screen lg:w-[270px] lg:shrink-0 lg:px-5 lg:py-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-blue)] text-white shadow-lg shadow-black/20">
+            <Landmark className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <div className="text-xl font-bold leading-none">MPOnline</div>
+            <p className="mt-1 text-[11px] text-white/60">Madhya Pradesh services</p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <a 
-              href="tel:181" 
-              className="hidden sm:flex items-center gap-1 text-amber-400 hover:text-amber-300 font-semibold transition-colors"
-            >
-              <PhoneCall className="w-3 h-3" />
-              <span>{t.helplineText}</span>
-            </a>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${
-                systemStatus === 'ok' ? 'bg-emerald-400 animate-pulse' :
-                systemStatus === 'degraded' ? 'bg-amber-400' : 'bg-rose-400'
-              }`} />
-              <span className="text-slate-400 text-[10px] hidden sm:inline">
-                {systemStatus === 'ok' ? t.statusOnline :
-                 systemStatus === 'degraded' ? t.statusDegraded : t.statusOffline}
+        <nav aria-label="Services" className="grid grid-cols-2 gap-2 lg:mt-12 lg:grid-cols-1">
+          <button
+            type="button"
+            aria-pressed={activeService === 'grievance'}
+            onClick={() => setActiveService('grievance')}
+            className={`group flex min-h-[62px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${activeService === 'grievance' ? 'bg-white text-[var(--color-ink)] shadow-lg shadow-black/10' : 'text-white/75 hover:bg-white/10 hover:text-white'}`}
+          >
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${activeService === 'grievance' ? 'bg-[var(--color-blue)] text-white' : 'bg-white/10 text-[var(--color-sun)]'}`}>
+              <Building2 className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-bold">{language === 'hi' ? 'सीएम ऑनलाइन' : 'CM Online'}</span>
+              <span className={`hidden text-[11px] sm:block ${activeService === 'grievance' ? 'text-slate-500' : 'text-white/50'}`}>{language === 'hi' ? 'जन-शिकायत 181' : 'Grievances / 181'}</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={activeService === 'yojana'}
+            onClick={() => setActiveService('yojana')}
+            className={`group flex min-h-[62px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${activeService === 'yojana' ? 'bg-white text-[var(--color-ink)] shadow-lg shadow-black/10' : 'text-white/75 hover:bg-white/10 hover:text-white'}`}
+          >
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${activeService === 'yojana' ? 'bg-[var(--color-sea)] text-white' : 'bg-white/10 text-[var(--color-sun)]'}`}>
+              <FileCheck2 className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-bold">{language === 'hi' ? 'योजना साथी' : 'Yojana Sathi'}</span>
+              <span className={`hidden text-[11px] sm:block ${activeService === 'yojana' ? 'text-slate-500' : 'text-white/50'}`}>{language === 'hi' ? 'योजनाएं व दस्तावेज़' : 'Schemes / documents'}</span>
+            </span>
+          </button>
+        </nav>
+
+        <div className="mt-auto hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4 lg:block">
+          <p className="text-xs font-semibold text-white/75">Need help by phone?</p>
+          <a href="tel:181" className="mt-2 flex items-center gap-2 text-lg font-bold text-[var(--color-sun)] hover:text-white">
+            <PhoneCall className="h-4 w-4" aria-hidden="true" /> 181
+          </a>
+          <p className="mt-1 text-[11px] text-white/45">Madhya Pradesh CM helpline</p>
+        </div>
+      </aside>
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 border-b border-[#dce4ed] bg-white/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-[#65758b]">{t.govTitle}</p>
+              <p className="hidden truncate text-[11px] text-[#8b98a8] sm:block">{t.govSubtitle}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <span className="hidden items-center gap-2 rounded-full bg-[var(--color-cloud)] px-3 py-2 text-xs font-semibold text-[#53647a] md:inline-flex" role="status" aria-live="polite">
+                <span className={`h-2 w-2 rounded-full ${systemStatus === 'ok' ? 'bg-[#339f91]' : systemStatus === 'degraded' ? 'bg-[var(--color-sun)]' : 'bg-[#dc6c61]'}`} />
+                {systemStatus === 'ok' ? t.statusOnline : systemStatus === 'degraded' ? t.statusDegraded : t.statusOffline}
               </span>
+              <a href="tel:181" aria-label={t.helplineText} className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff4db] text-[#9a691b] transition-colors hover:bg-[var(--color-sun)] hover:text-[var(--color-ink)] sm:hidden">
+                <PhoneCall className="h-4 w-4" aria-hidden="true" />
+              </a>
+              <a href="tel:181" className="hidden items-center gap-2 rounded-full bg-[#fff4db] px-3.5 py-2 text-xs font-bold text-[#805816] transition-colors hover:bg-[var(--color-sun)] sm:inline-flex">
+                <PhoneCall className="h-3.5 w-3.5" aria-hidden="true" /> {t.helplineText}
+              </a>
+              <button
+                type="button"
+                onClick={goAuthorityLogin}
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--color-ink)] px-3.5 text-xs font-bold text-white transition-colors hover:bg-[var(--color-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] sm:px-4 sm:text-sm"
+              >
+                <ShieldCheck className="h-4 w-4 text-[var(--color-sun)]" aria-hidden="true" />
+                <span className="hidden sm:inline">{language === 'hi' ? 'प्राधिकारी लॉगिन' : 'Officer desk'}</span>
+                <span className="sm:hidden">{language === 'hi' ? 'लॉगिन' : 'Officer'}</span>
+              </button>
+              <LanguageToggle language={language} onToggle={handleLanguageToggle} />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Main Navigation Bar with Dual Service Tabs */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-          {/* Logo & Portal Branding */}
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-900 via-indigo-950 to-indigo-900 flex items-center justify-center text-white shadow-md shadow-indigo-900/20 border border-slate-800">
-              <Landmark className="w-6 h-6 text-amber-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 font-heading">
-                  MP<span className="text-indigo-600">Online</span>
-                </span>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80 hidden sm:inline-block">
-                  GovTech 2026
-                </span>
-              </div>
-              <p className="text-[11px] font-medium text-slate-500 hidden md:block">
-                Unified Citizen Redressal & Welfare Portal
-              </p>
-            </div>
-          </div>
-
-          {/* Center Service Switcher Navigation Tabs */}
-          <nav className="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-            <button
-              onClick={() => setActiveService('grievance')}
-              className={`flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeService === 'grievance'
-                  ? 'bg-white text-indigo-900 shadow-md shadow-slate-200/80 ring-1 ring-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <Building2 className={`w-4 h-4 ${activeService === 'grievance' ? 'text-indigo-600' : 'text-slate-400'}`} />
-              <span>{t.serviceGrievance}</span>
-              {activeService === 'grievance' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse hidden sm:inline-block"></span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveService('yojana')}
-              className={`flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeService === 'yojana'
-                  ? 'bg-white text-emerald-900 shadow-md shadow-slate-200/80 ring-1 ring-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <FileCheck2 className={`w-4 h-4 ${activeService === 'yojana' ? 'text-emerald-600' : 'text-slate-400'}`} />
-              <span>{t.serviceYojana}</span>
-              {activeService === 'yojana' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse hidden sm:inline-block"></span>
-              )}
-            </button>
-          </nav>
-
-          {/* Right Controls: Authority login + Language Switcher */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={goAuthorityLogin}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 hover:bg-indigo-700 text-white shadow-sm transition-all"
-            >
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>{language === 'hi' ? 'प्राधिकारी लॉगिन' : 'Authority Login'}</span>
-            </button>
-            <LanguageToggle language={language} onToggle={handleLanguageToggle} />
-          </div>
-        </div>
-      </header>
+        </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+      <main className="service-view mx-auto w-full max-w-[1500px] flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         {/* SERVICE 1: MP CM ONLINE GRIEVANCE REDRESSAL PORTAL */}
         {activeService === 'grievance' && (
           <GrievancePortal 
@@ -245,57 +216,50 @@ export default function App() {
         {activeService === 'yojana' && (
           <div className="space-y-6">
             {/* Yojana Sathi Header Hero */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-emerald-800">
-              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="space-y-2 max-w-3xl">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                      योजना साथी (Yojana Sathi)
+            <section className="overflow-hidden rounded-[28px] border border-[#dce4ed] bg-white shadow-sm shadow-[#17243a]/[0.04]">
+              <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:p-8">
+                <div className="max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-bold text-[var(--color-blue)]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-[#dd9950]" /> योजना साथी / Yojana Sathi
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/20">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                      Zero Hallucination Rule-Based Engine
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eaf5f3] px-2.5 py-1 text-[#277c72]">
+                      <ShieldCheck className="h-3.5 w-3.5" /> Rule-based matching
                     </span>
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
+                  <h1 className="mt-5 max-w-3xl text-[30px] font-bold leading-[1.1] text-[var(--color-ink)] sm:text-[38px]">
                     {t.yojanaHeroTitle}
                   </h1>
-                  <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed">
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--color-muted)] sm:text-base">
                     {t.yojanaHeroSubtitle}
                   </p>
+                  <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-[#596a80]">
+                    <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[var(--color-sea)]" />13+ verified schemes</span>
+                    <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[var(--color-blue)]" />OCR document pre-check</span>
+                    <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-[var(--color-sun)]" />No citizen account</span>
+                  </div>
                 </div>
 
-                {/* Quick Switch to CM Online pill */}
-                <div className="flex-shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center space-y-2">
-                  <p className="text-xs text-emerald-100">Need Civic Redressal?</p>
+                <div className="rounded-[22px] bg-[var(--color-ink)] p-5 text-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold text-white/55">Need civic redressal?</p>
+                      <p className="mt-1 text-base font-bold">CM Online</p>
+                    </div>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-[var(--color-sun)]">
+                      <Building2 className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                  </div>
                   <button
                     onClick={() => setActiveService('grievance')}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-md transition-all"
+                    className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-sun)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
-                    <span>सीएम ऑनलाइन (MP CM Online)</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>सीएम ऑनलाइन / MP CM Online</span>
                   </button>
                 </div>
               </div>
-
-              {/* Pillars */}
-              <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-emerald-800/80 text-xs">
-                <div className="flex items-center gap-2 text-emerald-100">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                  <span>13+ MP & Central Welfare Schemes</span>
-                </div>
-                <div className="flex items-center gap-2 text-emerald-100">
-                  <div className="w-2 h-2 rounded-full bg-teal-400"></div>
-                  <span>Pre-Screening OCR & Vision AI</span>
-                </div>
-                <div className="flex items-center gap-2 text-emerald-100">
-                  <div className="w-2 h-2 rounded-full bg-amber-400"></div>
-                  <span>DPDP Act 2023 Zero-Storage</span>
-                </div>
-              </div>
-            </div>
+            </section>
 
             {/* Error banner if any */}
             {error && (
@@ -342,26 +306,23 @@ export default function App() {
         />
       )}
 
+      {/* Global Helpdesk AI chat (OpenRouter, guardrailed) */}
+      <HelpdeskChat language={language} />
+
       {/* Executive Footer */}
-      <footer className="mt-12 bg-white border-t border-slate-200/80 py-8 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <div className="space-y-1">
-            <p className="font-bold text-slate-800 text-sm">
-              Madhya Pradesh Citizen Redressal & Scheme Portal
-            </p>
-            <p className="text-[11px] text-slate-500">
-              MPOnline Idea & Innovation Hackathon 2026 • Challenge 5: AI Innovation for Public Services & Citizen-Centric Governance
-            </p>
-            <p className="text-[11px] text-slate-400">
-              Integrated Services: MP CM Online (Helpline 181 • 3-Tier Escalation) & Yojana Sathi (Scheme Eligibility & Document AI)
-            </p>
+      <footer className="mt-8 border-t border-[#dce4ed] bg-white py-5 text-xs text-[#64748b]">
+        <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-4 px-4 sm:px-6 md:flex-row md:items-center lg:px-8">
+          <div>
+            <p className="font-bold text-[var(--color-ink)]">Madhya Pradesh citizen services</p>
+            <p className="mt-1">CM Online grievance redressal / Yojana Sathi scheme assistance</p>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-indigo-800 bg-indigo-50/80 px-4 py-2 rounded-2xl border border-indigo-200/70">
-            <ShieldCheck className="w-4 h-4 flex-shrink-0 text-indigo-600" />
+          <p className="flex max-w-2xl items-start gap-2 leading-5">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-sea)]" aria-hidden="true" />
             <span>{t.privacyNote}</span>
-          </div>
+          </p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

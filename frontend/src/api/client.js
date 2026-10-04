@@ -3,7 +3,7 @@
  * failures surface as real errors (no local mock data).
  */
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
 async function parseError(res, fallback) {
   const errData = await res.json().catch(() => ({}));
@@ -203,4 +203,80 @@ export async function loginAuthority(email, password, deptId = '') {
   });
   if (!res.ok) await parseError(res, 'Login failed');
   return await res.json();
+}
+
+export async function fetchHelpdeskStatus() {
+  const res = await fetch(`${API_BASE}/api/helpdesk/status`);
+  if (!res.ok) await parseError(res, 'Helpdesk status unavailable');
+  return await res.json();
+}
+
+export async function sendHelpdeskMessage({ message, language = 'en', history = [], profile = null, docContext = null }) {
+  const res = await fetch(`${API_BASE}/api/helpdesk/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message,
+      language,
+      history: history.slice(-8).map((h) => ({ role: h.role, content: h.content })),
+      profile: profile || undefined,
+      doc_context: docContext || undefined,
+    }),
+  });
+  if (!res.ok) await parseError(res, 'Helpdesk reply failed');
+  return await res.json();
+}
+
+export async function streamHelpdeskMessage({ message, language = 'en', history = [], profile = null, docContext = null, onThinking, onToken, signal }) {
+  const res = await fetch(`${API_BASE}/api/helpdesk/chat/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    cache: 'no-store',
+    body: JSON.stringify({
+      message,
+      language,
+      history: history.slice(-8).map((h) => ({ role: h.role, content: h.content })),
+      profile: profile || undefined,
+      doc_context: docContext || undefined,
+    }),
+    signal,
+  });
+  if (res.status === 404) {
+    const err = new Error('Streaming endpoint not found on backend (outdated backend?)');
+    err.code = 'STREAM_UNSUPPORTED';
+    throw err;
+  }
+  if (!res.ok || !res.body) await parseError(res, 'Helpdesk stream failed');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let doneMeta = null;
+  const handleBlock = (block) => {
+    const lines = block.split('\n');
+    let event = null;
+    let data = '';
+    for (const line of lines) {
+      if (line.startsWith('event:')) event = line.slice(6).trim();
+      else if (line.startsWith('data:')) data += line.slice(5).trim();
+    }
+    if (!event || !data) return;
+    let payload = {};
+    try { payload = JSON.parse(data); } catch { return; }
+    if (event === 'thinking' && onThinking) onThinking(payload.text || '');
+    else if (event === 'token' && onToken) onToken(payload.text || '');
+    else if (event === 'done') doneMeta = payload;
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let idx;
+    while ((idx = buffer.indexOf('\n\n')) !== -1) {
+      const block = buffer.slice(0, idx);
+      buffer = buffer.slice(idx + 2);
+      handleBlock(block);
+    }
+  }
+  if (buffer.trim()) handleBlock(buffer);
+  return doneMeta;
 }

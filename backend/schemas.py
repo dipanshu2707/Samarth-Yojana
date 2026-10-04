@@ -223,3 +223,29 @@ class DepartmentItem(BaseModel):
     authority_l1_hi: str
     description_en: str = ""
     description_hi: str = ""
+
+
+# ==========================================
+# Helpdesk AI chat schemas
+# ==========================================
+
+class HelpdeskHistoryItem(BaseModel):
+    role: str = Field(description="user | assistant")
+    content: str
+
+
+class HelpdeskChatRequest(BaseModel):
+    message: str
+    language: str = "en"
+    history: List[HelpdeskHistoryItem] = []
+    profile: Optional[Dict[str, Any]] = None
+    doc_context: Optional[Dict[str, Any]] = None
+
+
+class HelpdeskChatResponse(BaseModel):
+    reply: str
+    intent: str = "in_scope"
+    guardrail_triggered: bool = False
+    suggested_schemes: List[str] = []
+    model: str = ""
+    fallback: bool = False

@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
-  Building2, Sparkles, ShieldCheck, ArrowRight, Search, RefreshCw,
-  MapPin, Flame, PhoneCall,
+  Building2, ShieldCheck, Search, RefreshCw, FilePlus2,
+  MapPin, Flame, PhoneCall, Smartphone, TicketCheck, MapPinned,
 } from 'lucide-react';
 import FileGrievanceForm from './grievance/FileGrievanceForm';
 import FindByMobile from './grievance/FindByMobile';
 import OfficerDesk from './grievance/OfficerDesk';
 import TicketDossier from './grievance/TicketDossier';
-import MpHeatmap from './grievance/MpHeatmap';
 import ServerWakeButton from './grievance/ServerWakeButton';
 import { trackGrievance, fetchHotspots, listGrievances } from '../api/client';
+
+const MpHeatmap = dynamic(() => import('./grievance/MpHeatmap'), {
+  ssr: false,
+  loading: () => <div className="h-[520px] animate-pulse bg-[#e8eeea]" aria-label="Loading complaint map" />,
+});
 
 export default function GrievancePortal({ language = 'en', onSwitchToYojana, officerSignal = 0 }) {
   const [activeTab, setActiveTab] = useState('file');
@@ -97,74 +102,90 @@ export default function GrievancePortal({ language = 'en', onSwitchToYojana, off
   const t = {
     title: language === 'hi'
       ? 'म.प्र. मुख्यमंत्री ऑनलाइन जन-शिकायत निवारण पोर्टल'
-      : 'MP CM Online — Civic Grievance Redressal Portal',
+      : 'MP CM Online grievance service',
     subtitle: language === 'hi'
       ? 'विभाग चुनें • फोटो/आवाज़ साक्ष्य जोड़ें • मोबाइल से ट्रैक करें • प्राधिकारी कार्रवाई सहित'
-      : 'Pick a department • attach photo/voice proof • track by mobile • follow officer actions live',
-    tabFile: language === 'hi' ? '📝 शिकायत दर्ज करें' : '📝 File Complaint',
-    tabMobile: language === 'hi' ? '📱 मोबाइल से खोजें' : '📱 Find by Mobile',
-    tabTrack: language === 'hi' ? '🔍 टिकट से ट्रैक' : '🔍 Track by Ticket',
-    tabHotspots: language === 'hi' ? '📊 हॉटस्पॉट' : '📊 Hotspots',
-    tabOfficer: language === 'hi' ? '🛡️ प्राधिकारी डेस्क' : '🛡️ Authority Desk',
+      : 'Submit a complaint with evidence, then follow every officer action.',
+    tabFile: language === 'hi' ? 'शिकायत दर्ज करें' : 'File complaint',
+    tabMobile: language === 'hi' ? 'मोबाइल से खोजें' : 'Find by mobile',
+    tabTrack: language === 'hi' ? 'टिकट से ट्रैक' : 'Track a ticket',
+    tabHotspots: language === 'hi' ? 'हॉटस्पॉट' : 'District hotspots',
+    tabOfficer: language === 'hi' ? 'प्राधिकारी डेस्क' : 'Authority desk',
+    openCases: language === 'hi' ? 'कुल शिकायतें' : 'Cases on record',
+    serviceStandard: language === 'hi' ? 'तीन-स्तरीय शिकायत निवारण' : 'Three-level resolution process',
+    fileAction: language === 'hi' ? 'शिकायत भेजें' : 'Start a complaint',
   };
 
+  const serviceTabs = [
+    { id: 'file', label: t.tabFile, icon: FilePlus2 },
+    { id: 'mobile', label: t.tabMobile, icon: Smartphone },
+    { id: 'track', label: t.tabTrack, icon: TicketCheck },
+    { id: 'hotspots', label: t.tabHotspots, icon: MapPinned },
+    { id: 'officer', label: t.tabOfficer, icon: ShieldCheck },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-slate-800">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" /> MP CM Online • जन सेवा
+    <div className="space-y-5">
+      <section className="overflow-hidden rounded-[28px] bg-[var(--color-ink)] p-5 text-white shadow-xl shadow-[#17243a]/10 sm:p-7 lg:p-8">
+        <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_270px] lg:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 font-bold text-[var(--color-sun)]">
+                <Building2 className="h-3.5 w-3.5" /> MP CM Online / जन सेवा
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                <ShieldCheck className="w-3.5 h-3.5" /> 3-Tier Redressal (L1 ➔ L2 ➔ L3)
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                <PhoneCall className="w-3.5 h-3.5" /> Helpline 181
+              <span className="inline-flex items-center gap-1.5 font-medium text-white/70">
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--color-sea)]" /> {t.serviceStandard}
               </span>
               <ServerWakeButton language={language} compact />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">{t.title}</h1>
-            <p className="text-sm sm:text-base text-slate-300">{t.subtitle}</p>
+            <h1 className="mt-5 max-w-3xl text-[30px] font-bold leading-[1.1] sm:text-[38px]">{t.title}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/65 sm:text-base">{t.subtitle}</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <a href="tel:181" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-sun)] px-4 text-xs font-bold text-[var(--color-ink)] transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                <PhoneCall className="h-3.5 w-3.5" /> Helpline 181
+              </a>
+              <button onClick={onSwitchToYojana} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/20 px-4 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                {language === 'hi' ? 'योजना साथी' : 'Explore welfare schemes'}
+              </button>
+            </div>
           </div>
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center space-y-2">
-            <p className="text-xs text-slate-300">Need Scheme Assistance?</p>
-            <button onClick={onSwitchToYojana} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-bold">
-              <span>योजना साथी</span> <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+
+          <div className="grid grid-cols-[1fr_auto] items-end gap-3 rounded-3xl border border-white/10 bg-white/[0.07] p-5 lg:grid-cols-1 lg:items-start">
+            <div>
+              <p className="text-xs font-semibold text-white/55">{t.openCases}</p>
+              <p className="mt-1 text-5xl font-bold tracking-normal text-white">{recentCount.toLocaleString('en-IN')}</p>
+            </div>
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-sea)] text-white lg:mt-1">
+              <TicketCheck className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="col-span-2 border-t border-white/10 pt-3 text-xs text-white/60 lg:col-span-1">
+              {language === 'hi' ? 'अपनी शिकायत या हालिया कार्रवाई देखें।' : 'File a concern or check the latest action on a case.'}
+              <button onClick={() => setActiveTab('file')} className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-white px-4 text-xs font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-sun)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                {t.fileAction}
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-800/80 text-xs text-slate-300">
-          <span><strong>① File:</strong> dept + photo/voice</span>
-          <span><strong>② Track:</strong> mobile number</span>
-          <span><strong>③ Action:</strong> desk remarks</span>
-          <span><strong>④ Apex:</strong> {recentCount} cases live</span>
         </div>
         {loadError && (
-          <p className="relative z-10 mt-3 text-[11px] font-semibold text-amber-300 bg-white/10 border border-white/15 rounded-xl px-3 py-2">
+          <p className="mt-4 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-[11px] font-semibold text-[#f5cd78]">
             Live data failed: {loadError}. Check that the backend API is running.
           </p>
         )}
-      </div>
+      </section>
 
-      <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-        {[
-          { id: 'file', label: t.tabFile },
-          { id: 'mobile', label: t.tabMobile },
-          { id: 'track', label: t.tabTrack },
-          { id: 'hotspots', label: t.tabHotspots },
-          { id: 'officer', label: t.tabOfficer },
-        ].map((tab) => (
+      <nav aria-label={language === 'hi' ? 'शिकायत सेवाएं' : 'Grievance tasks'} className="flex gap-2 overflow-x-auto rounded-2xl border border-[#e1e7ef] bg-white p-2 shadow-sm shadow-[#17243a]/[0.03]">
+        {serviceTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
+            className={`flex min-h-12 min-w-[128px] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue)] sm:text-sm ${activeTab === tab.id ? 'bg-[var(--color-blue)] text-white shadow-md shadow-[var(--color-blue)]/20' : 'text-[#67778d] hover:bg-[var(--color-cloud)] hover:text-[var(--color-ink)]'}`}
           >
-            {tab.label}
+            <tab.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="whitespace-nowrap">{tab.label}</span>
           </button>
         ))}
-      </div>
+      </nav>
 
       {activeTab === 'file' && (
         <FileGrievanceForm
@@ -182,7 +203,7 @@ export default function GrievancePortal({ language = 'en', onSwitchToYojana, off
 
       {activeTab === 'track' && (
         <div className="space-y-5">
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+          <div className="rounded-[24px] border border-[#dce4ed] bg-white p-5 shadow-sm shadow-[#17243a]/[0.04] sm:p-6">
             <form onSubmit={(e) => runTrack(e)} className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
                 <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -190,10 +211,10 @@ export default function GrievancePortal({ language = 'en', onSwitchToYojana, off
                   value={ticketInput}
                   onChange={(e) => setTicketInput(e.target.value)}
                   placeholder="Ticket ID (e.g. MP-CMO-2026-XXXXX)"
-                  className="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-[#cbd6e4] py-3 pl-12 pr-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-blue)]"
                 />
               </div>
-              <button type="submit" disabled={trackLoading} className="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+              <button type="submit" disabled={trackLoading} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--color-blue)] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#3155b8] disabled:opacity-50">
                 {trackLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 {language === 'hi' ? 'ट्रैक करें' : 'Track'}
               </button>
@@ -218,6 +239,7 @@ export default function GrievancePortal({ language = 'en', onSwitchToYojana, off
       {activeTab === 'hotspots' && (
         <div className="space-y-5">
           <MpHeatmap
+            key="mp-district-hotspot-map"
             language={language}
             cases={hotspotCases}
             hotspots={hotspots}

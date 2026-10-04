@@ -22,7 +22,7 @@ export default function AuthorityLogin({
 
   return (
     <div id="authority-login" className="space-y-6">
-      <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-slate-800">
+      <div className="rounded-[26px] bg-[var(--color-ink)] p-6 text-white shadow-xl shadow-[var(--color-ink)]/10 sm:p-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/15">
             <KeyRound className="w-6 h-6 text-amber-300" />
@@ -74,7 +74,7 @@ export default function AuthorityLogin({
             {loginError && <p className="text-xs text-rose-600 font-semibold">{loginError}</p>}
             <button
               disabled={loading}
-              className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-blue)] py-3 text-sm font-bold text-white transition-colors hover:bg-[#3155b8] disabled:opacity-50"
             >
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
               {language === 'hi' ? 'लॉगिन करें' : 'Sign in to desk'}

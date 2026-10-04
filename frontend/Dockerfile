@@ -1,12 +1,17 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
+ARG API_PROXY_TARGET=http://api:8000
+ENV API_PROXY_TARGET=$API_PROXY_TARGET
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/node_modules ./node_modules
 EXPOSE 5173
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "start"]

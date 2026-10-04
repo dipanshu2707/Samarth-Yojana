@@ -31,7 +31,7 @@ from typing import Dict, Any, Optional, List
 
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form, Body, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -45,7 +45,8 @@ from schemas import (
     GrievanceResolveRequest, GrievanceStatusUpdateRequest,
     GrievanceApprovalRequest, GrievanceApprovalDecision,
     HotspotItem, LoginRequest, LoginResponse, DepartmentItem,
-    EmailTestRequest,
+    EmailTestRequest, HelpdeskChatRequest, HelpdeskChatResponse,
+    HelpdeskHistoryItem,
 )
 from grievance_engine import (
     GRIEVANCE_STORE, create_grievance, escalate_grievance,
@@ -74,7 +75,7 @@ app = FastAPI(title="Yojana Sathi Unified API", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -708,6 +709,273 @@ async def api_resolve_grievance(ticket_id: str, request_data: GrievanceResolveRe
 @app.get("/api/grievance/hotspots", response_model=List[HotspotItem])
 async def api_get_hotspots():
     return get_hotspot_analytics()
+
+
+# ==========================================================
+# Helpdesk AI chat (OpenRouter, server-side key, guardrailed)
+# ==========================================================
+
+@app.get("/api/helpdesk/status")
+async def api_helpdesk_status():
+    import helpdesk as hd
+
+    key = (os.getenv("OPENROUTER_API_KEY", "") or "").strip()
+    model = os.getenv("OPENROUTER_MODEL", hd.DEFAULT_MODEL) or hd.DEFAULT_MODEL
+    return {
+        "configured": bool(key),
+        "model": model,
+        "provider": "openrouter",
+        # Capability handshake: the chat UI enables thinking + token
+        # streaming only when the backend reports these. If an old
+        # backend is running, the UI shows "restart backend" instead
+        # of silently falling back to instant replies.
+        "agent": True,
+        "stream": True,
+        "search_tool": "duckduckgo-free",
+        "helpdesk_version": 2,
+    }
+
+
+@app.post("/api/helpdesk/chat", response_model=HelpdeskChatResponse)
+async def api_helpdesk_chat(payload: HelpdeskChatRequest):
+    import helpdesk as hd
+
+    prep = _helpdesk_prep(payload)
+    message, language, scope = prep["message"], prep["language"], prep["scope"]
+    history_msgs, match_block = prep["history"], prep["match_block"]
+    doc_block, matches = prep["doc_block"], prep["matches"]
+
+    # 1) Deterministic pre-guardrail — no LLM call for clear out-of-scope input.
+    if scope == "out_of_scope":
+        return HelpdeskChatResponse(
+            reply=hd.refusal_text(language),
+            intent="out_of_scope",
+            guardrail_triggered=True,
+            suggested_schemes=[],
+            model="guardrail",
+            fallback=False,
+        )
+
+    system_text, user_text, meta = await hd.build_turn(
+        message, history_msgs, language, DATASET, match_block, doc_block
+    )
+    reply, error = await hd.call_openrouter(
+        history_msgs + [{"role": "user", "content": user_text}],
+        dataset=DATASET,
+        system_text=system_text,
+    )
+    if error or not reply:
+        print(f"[Helpdesk] LLM unavailable, fallback: {error}")
+        return HelpdeskChatResponse(
+            reply=hd.local_fallback_answer(message, language, matches or None),
+            intent="in_scope" if scope == "in_scope" else "ambiguous",
+            guardrail_triggered=False,
+            suggested_schemes=[m.get("scheme_id", "") for m in (matches or []) if m.get("scheme_id")],
+            model="fallback",
+            fallback=True,
+        )
+
+    # 3) Post-filter: if the model drifted and answered an out-of-scope
+    #    question anyway, replace with the refusal (defence in depth).
+    if scope == "ambiguous" and hd.classify_scope(message) == "out_of_scope":
+        return HelpdeskChatResponse(
+            reply=hd.refusal_text(language),
+            intent="out_of_scope",
+            guardrail_triggered=True,
+            suggested_schemes=[],
+            model="guardrail",
+            fallback=False,
+        )
+
+    suggested = [m.get("scheme_id", "") for m in (matches or []) if m.get("scheme_id")]
+    for sid in meta.get("schemes", []):
+        if sid and sid not in suggested:
+            suggested.append(sid)
+    return HelpdeskChatResponse(
+        reply=reply,
+        intent="in_scope" if scope == "in_scope" else "ambiguous",
+        guardrail_triggered=False,
+        suggested_schemes=suggested,
+        model=os.getenv("OPENROUTER_MODEL", hd.DEFAULT_MODEL) or hd.DEFAULT_MODEL,
+        fallback=False,
+    )
+
+
+def _helpdesk_prep(payload: HelpdeskChatRequest) -> dict:
+    """Shared validation + deterministic grounding for both chat endpoints."""
+    message = (payload.message or "").strip()
+    language = "hi" if (payload.language or "en").lower().startswith("hi") else "en"
+    if not message:
+        raise HTTPException(status_code=400, detail="Message is required.")
+    if len(message) > 2000:
+        raise HTTPException(status_code=400, detail="Message too long (max 2000 chars).")
+
+    import helpdesk as hd
+
+    scope = hd.classify_scope(message)
+
+    # Deterministic eligibility grounding: run the rule engine in-process
+    # when a profile is supplied so the LLM cannot invent eligibility.
+    matches: list = []
+    match_block = ""
+    if isinstance(payload.profile, dict) and payload.profile:
+        try:
+            res = evaluate_all(payload.profile, DATASET)
+            matches = (res.get("matches") or [])[:5]
+            if matches:
+                lines = [
+                    f"- {m.get('scheme_id')}: {m.get('name')} — {m.get('plain_language_reason', '')}"
+                    for m in matches
+                ]
+                match_block = (
+                    "Deterministic rule-engine matches for this profile (present these faithfully, do not add others):\n"
+                    + "\n".join(lines)
+                )
+        except Exception as e:
+            print(f"[Helpdesk] matcher grounding failed: {e}")
+
+    doc_block = ""
+    if isinstance(payload.doc_context, dict) and payload.doc_context:
+        try:
+            doc_block = "Document pre-check result to explain:\n" + json.dumps(
+                payload.doc_context, ensure_ascii=False
+            )[:1500]
+        except Exception:
+            doc_block = ""
+
+    history = []
+    for h in (payload.history or [])[-8:]:
+        role = (h.role or "").strip().lower()
+        if role not in ("user", "assistant"):
+            continue
+        if not (h.content or "").strip():
+            continue
+        history.append({"role": role, "content": h.content.strip()[:1000]})
+
+    return {
+        "message": message, "language": language, "scope": scope,
+        "history": history, "match_block": match_block,
+        "doc_block": doc_block, "matches": matches,
+    }
+
+
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+def _think(language: str, key: str, detail: str = "") -> str:
+    texts = {
+        "understand": {"en": "Understanding your question…", "hi": "आपका सवाल समझ रहा हूँ…"},
+        "facts": {"en": "Checking what I already know about you…", "hi": "आपके बारे में ज्ञात जानकारी जांच रहा हूँ…"},
+        "schemes": {"en": "Checking official scheme rules…", "hi": "आधिकारिक योजना नियम जांच रहा हूँ…"},
+        "search": {"en": "Searching official updates", "hi": "आधिकारिक अपडेट खोज रहा हूँ"},
+        "found": {"en": "Found official sources, verifying…", "hi": "आधिकारिक स्रोत मिले, सत्यापित कर रहा हूँ…"},
+        "nosearch": {"en": "No fresh search needed, using verified scheme data…",
+                     "hi": "ताज़ा खोज की ज़रूरत नहीं, सत्यापित योजना डेटा उपयोग कर रहा हूँ…"},
+        "compose": {"en": "Composing your answer…", "hi": "आपका उत्तर तैयार कर रहा हूँ…"},
+    }
+    base = texts.get(key, texts["understand"]).get(language, texts["understand"]["en"])
+    if detail:
+        base = f"{base} ({detail})"
+    return base
+
+
+@app.post("/api/helpdesk/chat/stream")
+async def api_helpdesk_chat_stream(payload: HelpdeskChatRequest):
+    """Agentic streaming chat: thinking events, then live response tokens.
+
+    Events: `thinking` {text} -> `token` {text} -> `done` {intent,
+    guardrail_triggered, suggested_schemes, model, fallback, searched, reply}.
+    """
+    import helpdesk as hd
+
+    prep = _helpdesk_prep(payload)
+    message, language, scope = prep["message"], prep["language"], prep["scope"]
+    model_name = os.getenv("OPENROUTER_MODEL", hd.DEFAULT_MODEL) or hd.DEFAULT_MODEL
+
+    async def gen():
+        yield _sse("thinking", {"text": _think(language, "understand")})
+        if scope == "out_of_scope":
+            reply = hd.refusal_text(language)
+            yield _sse("done", {
+                "reply": reply, "intent": "out_of_scope", "guardrail_triggered": True,
+                "suggested_schemes": [], "model": "guardrail", "fallback": False, "searched": False,
+            })
+            return
+
+        yield _sse("thinking", {"text": _think(language, "facts")})
+        system_text, user_text, meta = await hd.build_turn(
+            message, prep["history"], language, DATASET, prep["match_block"], prep["doc_block"]
+        )
+        known = ", ".join(f"{k}={v}" for k, v in (meta.get("slots") or {}).items())
+        if known:
+            yield _sse("thinking", {"text": _think(language, "facts", known[:120])})
+        if meta.get("schemes"):
+            yield _sse("thinking", {"text": _think(language, "schemes", ", ".join(meta['schemes'][:3]))})
+        if hd.needs_search(message):
+            yield _sse("thinking", {"text": _think(language, "search", f"'{message[:60]}'")})
+            if meta.get("searched"):
+                yield _sse("thinking", {"text": _think(language, "found")})
+            else:
+                yield _sse("thinking", {"text": _think(language, "nosearch")})
+        yield _sse("thinking", {"text": _think(language, "compose")})
+
+        full = []
+        try:
+            async for delta in hd.stream_openrouter(
+                system_text, prep["history"] + [{"role": "user", "content": user_text}]
+            ):
+                full.append(delta)
+                yield _sse("token", {"text": delta})
+        except Exception as e:
+            print(f"[Helpdesk] stream failed, fallback: {e}")
+            matches = prep["matches"]
+            reply = hd.local_fallback_answer(message, language, matches or None)
+            yield _sse("done", {
+                "reply": reply, "intent": "in_scope" if scope == "in_scope" else "ambiguous",
+                "guardrail_triggered": False,
+                "suggested_schemes": [m.get("scheme_id", "") for m in (matches or []) if m.get("scheme_id")],
+                "model": "fallback", "fallback": True, "searched": bool(meta.get("searched")),
+            })
+            return
+
+        reply = "".join(full).strip()
+        if not reply:
+            reply = hd.local_fallback_answer(message, language, prep["matches"] or None)
+            yield _sse("done", {
+                "reply": reply, "intent": "ambiguous", "guardrail_triggered": False,
+                "suggested_schemes": [], "model": "fallback", "fallback": True,
+                "searched": bool(meta.get("searched")),
+            })
+            return
+
+        if scope == "ambiguous" and hd.classify_scope(message) == "out_of_scope":
+            reply = hd.refusal_text(language)
+            yield _sse("done", {
+                "reply": reply, "intent": "out_of_scope", "guardrail_triggered": True,
+                "suggested_schemes": [], "model": "guardrail", "fallback": False, "searched": False,
+            })
+            return
+
+        suggested = [m.get("scheme_id", "") for m in (prep["matches"] or []) if m.get("scheme_id")]
+        for sid in meta.get("schemes", []):
+            if sid and sid not in suggested:
+                suggested.append(sid)
+        yield _sse("done", {
+            "reply": reply, "intent": "in_scope" if scope == "in_scope" else "ambiguous",
+            "guardrail_triggered": False, "suggested_schemes": suggested,
+            "model": model_name, "fallback": False, "searched": bool(meta.get("searched")),
+        })
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 if __name__ == "__main__":

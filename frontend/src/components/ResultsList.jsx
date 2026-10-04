@@ -21,10 +21,10 @@ export default function ResultsList({ results, onCheckDocument, onModifyAnswers,
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Top Banner with Stats & Back to Form */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 rounded-[22px] border border-[#dce4ed] bg-white p-5 shadow-sm shadow-[#17243a]/[0.04] sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 bg-emerald-100 text-emerald-800 rounded-xl">
+            <span className="rounded-xl bg-[#eaf0ff] p-2 text-[var(--color-blue)]">
               <Award className="w-5 h-5" />
             </span>
             <div>
@@ -63,7 +63,7 @@ export default function ResultsList({ results, onCheckDocument, onModifyAnswers,
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-slate-900 font-heading flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-600" />
+            <Sparkles className="h-5 w-5 text-[var(--color-sea)]" />
             <span>{t.matchesHeading} ({matches.length})</span>
           </h3>
         </div>

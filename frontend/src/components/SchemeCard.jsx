@@ -14,10 +14,10 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
   };
 
   return (
-    <div className={`rounded-2xl transition-all duration-200 border overflow-hidden ${
+    <article className={`overflow-hidden border-b border-l-2 transition-colors ${
       isPossible
-        ? 'bg-amber-50/30 border-amber-200/80 hover:border-amber-300'
-        : 'bg-white border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300'
+        ? 'border-amber-200 bg-white'
+        : 'border-[#d5deda] border-l-[#155b4a] bg-white'
     }`}>
       {/* Top Header */}
       <div className="p-5 pb-3">
@@ -26,12 +26,12 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
               isPossible
                 ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                : 'bg-[#eaf0ff] text-[#3155b8] border border-[#cfdbff]'
             }`}>
               {isPossible ? <AlertCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
               {isPossible ? t.possibleMatch : t.highConfidence}
             </span>
-            <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+            <span className="text-[11px] font-semibold text-slate-500">
               ID: {scheme.scheme_id}
             </span>
           </div>
@@ -42,7 +42,7 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
               href={scheme.official_portal.split(' ')[0]}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-blue)] hover:underline"
             >
               <span>{t.officialPortal}</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -57,13 +57,13 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
       </div>
 
       {/* Body content */}
-      <div className="px-5 pb-5 space-y-4 text-sm">
+      <div className="space-y-4 px-5 pb-5 text-sm">
         {/* Plain Language Reason - AI or Rule-based */}
-        <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3.5">
-          <span className="text-xs font-bold text-emerald-900 block mb-1">
+        <div className="border-l-2 border-[#78b9ae] bg-[#f2f7f4] p-3.5">
+          <span className="mb-1 block text-xs font-bold text-[#277c72]">
             {t.whyQualify}
           </span>
-          <p className="text-emerald-950 text-xs md:text-sm leading-relaxed">
+          <p className="text-xs leading-relaxed text-[var(--color-ink)] md:text-sm">
             {scheme.plain_language_reason}
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
               {scheme.required_documents.map((doc, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100 transition-colors"
+                  className="flex items-center justify-between border border-slate-200/70 bg-slate-50 p-2 transition-colors hover:bg-slate-100"
                 >
                   <div className="flex items-center gap-1.5 truncate pr-2">
                     <FileText className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
@@ -110,7 +110,7 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
                   <button
                     type="button"
                     onClick={() => onCheckDocument(scheme, doc)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-white hover:bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 flex-shrink-0 transition-colors"
+                    className="inline-flex min-h-8 flex-shrink-0 items-center gap-1 border border-[#b7c9c0] bg-white px-2 py-1 text-[11px] font-bold text-[#155b4a] transition-colors hover:bg-[#edf3ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#155b4a]"
                   >
                     <UploadCloud className="w-3 h-3" />
                     <span>{t.checkDocBtn}</span>
@@ -121,6 +121,6 @@ export default function SchemeCard({ scheme, onCheckDocument, language, isPossib
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

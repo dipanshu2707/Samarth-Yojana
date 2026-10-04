@@ -15,10 +15,6 @@
     {
       "source": "/uploads/(.*)",
       "destination": "https://yojana-sathi-api-orro.onrender.com/uploads/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }

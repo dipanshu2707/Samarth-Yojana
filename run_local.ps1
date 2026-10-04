@@ -17,10 +17,10 @@ if (-not $py) {
 
 # Start Unified Backend (Port 8000)
 Write-Host "[2/3] Starting Unified API on port 8000..." -ForegroundColor Yellow
-$pBackend = Start-Process python -ArgumentList "-m uvicorn main:app --host 127.0.0.1 --port 8000" -WorkingDirectory "$PSScriptRoot\backend" -PassThru
+$pBackend = Start-Process python -ArgumentList "-m uvicorn main:app --host 127.0.0.1 --port 8000 --reload" -WorkingDirectory "$PSScriptRoot\backend" -PassThru
 
 # Start Frontend (Port 5173)
-Write-Host "[3/3] Starting Vite React Frontend on port 5173..." -ForegroundColor Yellow
+Write-Host "[3/3] Starting Next.js Frontend on port 5173..." -ForegroundColor Yellow
 $pFrontend = Start-Process npm -ArgumentList "run dev" -WorkingDirectory "$PSScriptRoot\frontend" -PassThru
 
 Write-Host "==========================================================" -ForegroundColor Green

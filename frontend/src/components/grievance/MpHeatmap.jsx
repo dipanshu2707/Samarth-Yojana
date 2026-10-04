@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Tooltip, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.heat';
-import 'leaflet/dist/leaflet.css';
 import { Flame, RefreshCw, Layers, Tag, MapPin } from 'lucide-react';
 import { MP_CENTER, MP_BOUNDS, centroidOf, jitterFor, intensityFor } from './mpDistricts';
 import { workflowLabel } from './workflow';
@@ -17,16 +16,25 @@ function HeatManager({ points, visible }) {
   const map = useMap();
   useEffect(() => {
     if (!visible || points.length === 0) return undefined;
-    const layer = L.heatLayer(points, {
-      radius: 30,
-      blur: 24,
-      maxZoom: 11,
-      minOpacity: 0.4,
-      gradient: { 0.2: '#38bdf8', 0.45: '#a3e635', 0.65: '#fbbf24', 0.85: '#f97316', 1.0: '#e11d48' },
-    });
-    layer.addTo(map);
+    let layer = null;
+    try {
+      layer = L.heatLayer(points, {
+        radius: 30,
+        blur: 24,
+        maxZoom: 11,
+        minOpacity: 0.4,
+        gradient: { 0.2: '#38bdf8', 0.45: '#a3e635', 0.65: '#fbbf24', 0.85: '#f97316', 1.0: '#e11d48' },
+      });
+      layer.addTo(map);
+    } catch {
+      layer = null;
+    }
     return () => {
-      map.removeLayer(layer);
+      try {
+        if (layer) map.removeLayer(layer);
+      } catch {
+        /* map already torn down */
+      }
     };
   }, [map, points, visible]);
   return null;
@@ -45,6 +53,14 @@ export default function MpHeatmap({
   const [showBubbles, setShowBubbles] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [deptFilter, setDeptFilter] = useState('all');
+  // Gate Leaflet init to client-only post-mount. This prevents the
+  // "Map container is already initialized" crash caused by SSR/double-mount
+  // reusing the same container div (StrictMode / Fast Refresh / tab remount).
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => {
+    setClientReady(true);
+    return () => setClientReady(false);
+  }, []);
 
   const deptOptions = useMemo(() => {
     const seen = new Map();
@@ -82,10 +98,10 @@ export default function MpHeatmap({
       if (c.priority === 'Critical') b.critical += 1;
       b.items.push(c);
     });
-    const hotByDistrict = new Map(hotspots.map((h) => [h.district, h]));
+    const hotByDistrict = new Map((hotspots || []).map((h) => [String(h.district || '').toLowerCase().trim(), h]));
     return [...byDistrict.values()].map((b) => {
       const [lat, lng] = centroidOf(b.district);
-      const hot = hotByDistrict.get(b.district);
+      const hot = hotByDistrict.get(String(b.district || '').toLowerCase().trim());
       const intensity = b.critical > 0 || (hot && hot.hotspot_intensity === 'Severe')
         ? 'Severe'
         : b.total >= 2 || (hot && hot.hotspot_intensity === 'Elevated')
@@ -153,7 +169,9 @@ export default function MpHeatmap({
       </div>
 
       <div className="relative mx-4 sm:mx-5 mb-2 rounded-2xl overflow-hidden border border-slate-200" style={{ height: 520 }}>
+        {clientReady ? (
         <MapContainer
+          key="mp-heatmap-root"
           center={MP_CENTER}
           zoom={6}
           minZoom={5}
@@ -204,6 +222,11 @@ export default function MpHeatmap({
             </CircleMarker>
           ))}
         </MapContainer>
+        ) : (
+          <div className="h-full w-full animate-pulse bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400">
+            {language === 'hi' ? 'मानचित्र लोड हो रहा है…' : 'Loading map…'}
+          </div>
+        )}
 
         <div className="absolute bottom-3 right-3 z-[1000] bg-white/95 backdrop-blur rounded-xl border border-slate-200 shadow-md px-3 py-2 text-[10px] font-bold text-slate-600 space-y-1 pointer-events-none">
           <p className="flex items-center gap-1.5"><Layers className="w-3 h-3 text-slate-400" /> Density (priority-weighted)</p>
